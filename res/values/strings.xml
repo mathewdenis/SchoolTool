@@ -18,9 +18,13 @@
 	<string name="menu_pupil_edit">Namen ändern</string>
 	<string name="menu_pupil_delete">Schüler löschen</string>
 	<string name="menu_misses">Fehlstunden</string>
+	<string name="menu_misses_show">Fehlstunden anzeigen</string>
 	<string name="menu_misses_insert">Fehlstunden eingeben</string>
 	<string name="menu_miss_delete">Fehlstunde löschen</string>
 	<string name="menu_miss_delete_all">Alle Fehlstunden löschen</string>
+	<string name="menu_sort_by_size">nach Fehlstunden</string>
+	<string name="menu_sort_alph">alphabetisch</string>
+
 	<string name="kurs_edit_name">Name des Kurses</string>
 	<string name="kurs_start">Kursbeginn</string>
 	<string name="kurs_end">Kursende</string>

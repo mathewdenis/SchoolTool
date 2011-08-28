@@ -31,19 +31,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class SchuelerList extends ListActivity {
-	public static final String DEFAULT_SORT_ORDER_PUPIL = C.SCHUELER_NACHNAME + "," + C.SCHUELER_VORNAME;
-    // Identifiers for our menu items.
-    public static final int MENU_ITEM_ADD = Menu.FIRST;
-    public static final int MENU_ITEM_EDIT = Menu.FIRST + 1;
-    public static final int MENU_ITEM_DELETE = Menu.FIRST + 2;
-    public static final int MENU_ITEM_MISSES = Menu.FIRST + 3;
+	public static final String SORT_ORDER_NAME = C.SCHUELER_NACHNAME + "," + C.SCHUELER_VORNAME;
+	public static final String SORT_ORDER_MISS = C.MISS_SUM_STUNDEN_Z
+			+ " DESC," + C.MISS_SUM_STUNDEN_E + " ASC" + "," + SORT_ORDER_NAME;
+
+	/**
+	 * Special intent action meaning "view the pupils of a given course"
+	 */
+	public static final String ACTION_VIEW_PUPILS = "org.bob.school.action.VIEW_PUPILS";
+	// Identifiers for our menu items.
+    public static final int MENU_ITEM_SHOW_PUPIL_MISSES = Menu.FIRST + 1;
+    public static final int MENU_ITEM_ADD = Menu.FIRST + 1;
+    public static final int MENU_ITEM_EDIT = Menu.FIRST + 2;
+    public static final int MENU_ITEM_DELETE = Menu.FIRST + 3;
+    public static final int MENU_ITEM_MISSES = Menu.FIRST + 4;
+    public static final int MENU_SORT_LIST = Menu.FIRST + 5;
 
     public static final String TAG = "SchuelerList";
 
     // uri of the pupils directory to deal with
 	private Uri mUri;          // data: .../course/#
 	private Uri mWorkingUri;   // data: .../course/#/pupil
-
+	private short mSortOrderCode = 0;
 	
 	private static class MyPupilListViewBinder implements
 			SimpleCursorAdapter.ViewBinder {
@@ -110,16 +119,6 @@ public class SchuelerList extends ListActivity {
 		getContentResolver().notifyChange(mUri, null);
 	}
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle state) {
-		super.onRestoreInstanceState(state);
-	}
-
 	private void createPupilList() {
 		Uri uri = mWorkingUri
 				.buildUpon()
@@ -130,7 +129,7 @@ public class SchuelerList extends ListActivity {
 				C.MISS_SUM_STUNDEN_Z,
 				C.MISS_SUM_STUNDEN_E,
 				C.MISS_SUM_STUNDEN_NZ}, null, null,
-				DEFAULT_SORT_ORDER_PUPIL);
+				getSortOrder());
 
 		c.setNotificationUri(getContentResolver(), mUri);
 		SimpleCursorAdapter sca = new SimpleCursorAdapter(this,
@@ -140,6 +139,13 @@ public class SchuelerList extends ListActivity {
 						android.R.id.text1, android.R.id.text2 });
 		sca.setViewBinder(new MyPupilListViewBinder());
 		setListAdapter(sca);
+	}
+
+	private String getSortOrder() {
+		if(mSortOrderCode == 0)
+			return SORT_ORDER_NAME;
+		else
+			return SORT_ORDER_MISS;
 	}
 
 	@Override
@@ -153,36 +159,40 @@ public class SchuelerList extends ListActivity {
 		super.onListItemClick(l, v, position, id);
  
         Uri uri = ContentUris.withAppendedId(mWorkingUri, id);
-		startActivity(new Intent(Intent.ACTION_PICK, uri));	
+		startActivity(new Intent(Intent.ACTION_VIEW, uri));	
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE + 1, MENU_ITEM_ADD, 0, R.string.menu_pupil_insert)
+		menu.add(Menu.NONE, MENU_ITEM_ADD, 0, R.string.menu_pupil_insert)
 				.setShortcut('1', 'i').setIcon(android.R.drawable.ic_menu_add);
-		menu.add(Menu.NONE + 1, MENU_ITEM_EDIT, 0, R.string.menu_course_edit)
+		menu.add(Menu.NONE, MENU_ITEM_EDIT, 0, R.string.menu_course_edit)
 				.setShortcut('2', 'e').setIcon(android.R.drawable.ic_menu_edit)
 				.setIntent(new Intent(Intent.ACTION_EDIT, mUri));
-		menu.add(Menu.NONE + 1, MENU_ITEM_DELETE, 0, R.string.menu_course_delete)
+		menu.add(Menu.NONE, MENU_ITEM_DELETE, 0, R.string.menu_course_delete)
 				.setShortcut('3', 'd').setIcon(android.R.drawable.ic_menu_delete);
+		menu.add(Menu.NONE, MENU_SORT_LIST, 0, R.string.menu_sort_by_size)
+				.setShortcut('4', 's');
 
 		return super.onCreateOptionsMenu(menu);
 	}
 
-//	@Override
-//	public boolean onPrepareOptionsMenu(Menu menu) {
-//		menu.removeGroup(Menu.NONE + 2);
-//
-//		// if some pupils are in the course, display miss menu
-//		if(getListView().getCount()>0) {
-//			Uri uri = Uri.withAppendedPath(mUri, Constants.MISS_SEGMENT);
-//			menu.add(Menu.NONE + 2, MENU_ITEM_MISSES, 0, R.string.menu_misses)
-//			.setShortcut('3', 'm').setIcon(android.R.drawable.ic_menu_close_clear_cancel)
-//			.setIntent(new Intent(Intent.ACTION_PICK, uri));
-//		}
-//
-//		return super.onPrepareOptionsMenu(menu);
-//	}
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem soi = menu.getItem(3);
+		if(mSortOrderCode==0) {
+			soi.setIcon(android.R.drawable.ic_menu_sort_by_size);
+			soi.setTitle(R.string.menu_sort_by_size);
+		}
+		else {
+			soi.setIcon(android.R.drawable.ic_menu_sort_alphabetically);
+			soi.setTitle(R.string.menu_sort_alph);
+		}
+
+		// only enable if list is non-empty 
+		soi.setEnabled(getListView().getCount() > 0);
+		return super.onPrepareOptionsMenu(menu);
+	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -194,7 +204,12 @@ public class SchuelerList extends ListActivity {
 			AlertDialogs.createDeleteConfirmDialog(this, mUri, R.string.dialog_confirm_delete_title, 
 					R.string.dialog_confirm_delete_course, true).show();
 			break;
+		case MENU_SORT_LIST :
+			mSortOrderCode = (short)(1-mSortOrderCode);
+			createPupilList();
+			break;
 		}
+
 		return super.onOptionsItemSelected(item);
 	}
 	
@@ -213,10 +228,14 @@ public class SchuelerList extends ListActivity {
 				+ ", "
 				+ c.getString(c.getColumnIndex(C.SCHUELER_VORNAME)));
 
-        // Add a menu item to delete the note
-        menu.add(Menu.NONE, MENU_ITEM_EDIT, 0, R.string.menu_pupil_edit);
-        menu.add(Menu.NONE, MENU_ITEM_DELETE, 0, R.string.menu_pupil_delete);
-    }
+		// Add a menu item to delete the note
+		Uri uri = ContentUris.withAppendedId(mWorkingUri, info.id);
+		menu.add(Menu.NONE, MENU_ITEM_SHOW_PUPIL_MISSES, 0,
+				R.string.menu_misses_show)
+				.setIntent(new Intent(Intent.ACTION_VIEW, uri));
+		menu.add(Menu.NONE, MENU_ITEM_EDIT, 0, R.string.menu_pupil_edit);
+		menu.add(Menu.NONE, MENU_ITEM_DELETE, 0, R.string.menu_pupil_delete);
+	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
