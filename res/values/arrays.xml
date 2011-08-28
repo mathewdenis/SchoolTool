@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string-array name="stunden">
+		<item>0</item>
+		<item>1</item>
+		<item>2</item>
+	</string-array>
+	<string-array name="stunden_wo_0">
+		<item>1</item>
+		<item>2</item>
+	</string-array>
+</resources>

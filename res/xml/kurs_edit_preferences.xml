@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  <PreferenceCategory android:title="@string/kurs_details">
+			<EditTextPreference
+			    android:key="name"
+			    android:title="@string/kurs_edit_name"
+			    android:defaultValue="@android:string/untitled"
+			    android:summary="@android:string/untitled" />
+			<Preference
+				android:key="startdate"
+				android:title="@string/kurs_start" />
+			<Preference
+				android:key="enddate"
+				android:title="@string/kurs_end" />
+  </PreferenceCategory>
+  <PreferenceCategory android:title="@string/kurs_stunden">
+        <!--  The keys of the following preferences are tied
+              to the content of org.bob.school.Schule.Constants.KURS_WDAYS -->
+  		<ListPreference
+  			android:key="hMon"
+  			android:title="@string/wd_mon"
+  			android:summary="@string/sum_wd"
+  			android:entries="@array/stunden"
+  			android:entryValues="@array/stunden"
+  			android:defaultValue="0"
+  			 />
+  		<ListPreference
+  			android:key="hTue"
+  			android:title="@string/wd_tue"
+  			android:summary="@string/sum_wd"
+  			android:entries="@array/stunden"
+  			android:entryValues="@array/stunden"
+  			android:defaultValue="0"
+  			/>
+  		<ListPreference
+  			android:key="hWed"
+  			android:title="@string/wd_wed"
+  			android:summary="@string/sum_wd"
+  			android:entries="@array/stunden"
+  			android:entryValues="@array/stunden"
+  			android:defaultValue="0"
+  			/>
+  		<ListPreference
+  			android:key="hThu"
+  			android:title="@string/wd_thu"
+  			android:summary="@string/sum_wd"
+  			android:entries="@array/stunden"
+  			android:entryValues="@array/stunden"
+  			android:defaultValue="0"
+  			/>
+  		<ListPreference
+  			android:key="hFri"
+  			android:title="@string/wd_fri"
+  			android:summary="@string/sum_wd"
+  			android:entries="@array/stunden"
+  			android:entryValues="@array/stunden"
+  			android:defaultValue="0"
+  			/>
+  </PreferenceCategory>
+</PreferenceScreen>

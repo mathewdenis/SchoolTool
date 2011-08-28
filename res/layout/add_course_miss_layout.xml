@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<TextView android:textAppearance="?android:attr/textAppearanceMedium"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:id="@+id/date_caption" android:text="@string/date_caption" />
+	<EditText android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:id="@+id/miss_edittext"
+		android:inputType="none" android:clickable="true" android:focusable="false" />
+	<TextView android:textAppearance="?android:attr/textAppearanceMedium"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:id="@+id/miss_caption" android:text="@string/miss_caption" />
+	<Spinner android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:entries="@array/stunden_wo_0"
+		android:id="@+id/miss_spinner" />
+	<ListView android:layout_height="fill_parent"
+		android:layout_weight="1" android:layout_width="fill_parent"
+		android:id="@+id/pupils_list" />
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:orientation="horizontal"
+		style="@android:style/ButtonBar">
+		<Button android:id="@+id/save" android:focusable="true"
+			android:layout_width="fill_parent" android:layout_height="fill_parent"
+			android:layout_weight="1" android:text="@android:string/ok"
+			android:onClick="okClicked" />
+		<Button android:id="@+id/cancel" android:focusable="true"
+			android:layout_width="fill_parent" android:layout_height="fill_parent"
+			android:layout_weight="1" android:text="@android:string/cancel"
+			android:onClick="cancelClicked" />
+	</LinearLayout>
+</LinearLayout>

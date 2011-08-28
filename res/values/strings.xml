@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">Fehlstunden</string>
+
+	<string name="title_kurs_list">Kursliste</string>
+	<string name="title_pupil_list">Schülerliste</string>
+	<string name="title_kurs_fehlstunde_edit">Fehlstunden für Kurs eintragen</string>
+	<string name="title_kurs_fehlstunde_list">Fehlstunden für Kurs</string>
+	<string name="title_fehlstunde_edit">Fehlstunde bearbeiten</string>
+	
+	<string name="title_kurs_edit">Kurs ändern</string>
+	<string name="resolv_kurs_edit">Kurs bearbeiten</string>
+	<string name="menu_course_insert">Kurs einfügen</string>
+	<string name="menu_course_edit">Kurseinstellungen</string>
+	<string name="menu_course_pick">Kurs bearbeiten</string>
+	<string name="menu_course_delete">Kurs löschen</string>
+	<string name="menu_pupil_insert">Schüler einfügen</string>
+	<string name="menu_pupil_edit">Namen ändern</string>
+	<string name="menu_pupil_delete">Schüler löschen</string>
+	<string name="menu_misses">Fehlstunden</string>
+	<string name="menu_misses_insert">Fehlstunden eingeben</string>
+	<string name="menu_miss_delete">Fehlstunde löschen</string>
+	<string name="menu_miss_delete_all">Alle Fehlstunden löschen</string>
+	<string name="kurs_edit_name">Name des Kurses</string>
+	<string name="kurs_start">Kursbeginn</string>
+	<string name="kurs_end">Kursende</string>
+	<string name="kurs_stunden">Stunden des Kurses</string>
+	<string name="sum_wd">Stundenzahl des Kurses an diesem Wochentag</string>
+	<string name="wd_mon">Montag</string>
+	<string name="wd_tue">Dienstag</string>
+	<string name="wd_wed">Mittwoch</string>
+	<string name="wd_thu">Donnerstag</string>
+	<string name="wd_fri">Freitag</string>
+	<string name="miss_caption">Fehlstunden</string>
+	<string name="miss_excused_caption">Fehlstunden entschuldigt</string>
+	<string name="miss_count_caption">Fehlstunden zählen</string>
+	<string name="sum_count">Nicht als Fehlstunden zählen etwa Schulveranstaltungen</string><string name="date_caption">Datum</string>
+	
+	<string name="kurs_details">Details</string>
+	<string name="kurs_save">Speichern</string>
+	<string name="kurs_cancel">Abbrechen</string>
+
+	<string name="dialog_confirm_delete_title">Wirklich löschen?</string>
+	<string name="dialog_confirm_delete_course">Soll der Kurs und alle mit ihm assoziierten Schüler	und Fehlstunden gelöscht werden?</string>
+	<string name="dialog_confirm_delete_pupil">Soll der Schüler und alle mit ihm assoziierten Fehlstunden gelöscht werden?</string>
+	<string name="dialog_confirm_delete_miss">Soll die Fehlstunde gelöscht werden?</string>
+	<string name="dialog_confirm_delete_miss_all">Sollen alle Fehlstunden des Kurses zu diesem Datum gelöscht werden?</string>
+	<string name="dialog_pupil_add_format">Format: Name1, Vorname1; Name2, Vorname2; ...</string>
+	<string name="dialog_pupil_edit">Format: Name, Vorname</string>
+
+	<string name="toast_pupil_add">Es wurden %1$d Schüler hinzugefügt.</string>
+	<string name="toast_miss_delete">Es wurden %1$d Fehlstundeneinträge gelöscht.</string>
+	
+</resources>
