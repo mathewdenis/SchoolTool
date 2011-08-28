@@ -4,7 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import org.bob.school.Schule.Constants;
+import org.bob.school.Schule.C;
 import org.bob.school.tools.CalendarTools;
 
 import android.app.Activity;
@@ -77,7 +77,7 @@ public class KursFehlstundenEditor extends Activity implements
 		mCursor = managedQuery(mUri, null, null, null, null);
 		mCursor.moveToFirst();
 		mCourseName = mCursor.getString(mCursor
-				.getColumnIndex(Constants.KURS_NAME));
+				.getColumnIndex(C.KURS_NAME));
 
 		setTitle(getTitle() + ": " + mCourseName);
 
@@ -96,13 +96,13 @@ public class KursFehlstundenEditor extends Activity implements
 		});
 
 		// retrieve the hours for the course for todays weekday
-		// if there is no lesson today, set
+		// if there is no lesson today, set "1"
 		mCourseHoursSpinner = (Spinner)findViewById(R.id.miss_spinner);
 		mHoursAdapter = (ArrayAdapter<String>) mCourseHoursSpinner.getAdapter();
 		mDayOfWeek = today.get(Calendar.DAY_OF_WEEK);
 		if (mDayOfWeek >= Calendar.MONDAY && mDayOfWeek <= Calendar.FRIDAY) {
 			int h = mCursor.getInt(mCursor
-					.getColumnIndex(Constants.KURS_WDAYS[mDayOfWeek - 2]));
+					.getColumnIndex(C.KURS_WDAYS[mDayOfWeek - 2]));
 
 			if (h == 0)
 				mCourseHoursSpinner.setSelection(mHoursAdapter.getPosition("1"));
@@ -112,15 +112,15 @@ public class KursFehlstundenEditor extends Activity implements
 		}
 
 		// query
-		Uri uri = Uri.withAppendedPath(mUri, Constants.PUPIL_SEGMENT);
-		Cursor c = managedQuery(uri, new String[] { Constants._ID,
-				Constants.SCHUELER_NACHNAME, Constants.SCHUELER_VORNAME },
+		Uri uri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);
+		Cursor c = managedQuery(uri, new String[] { C._ID,
+				C.SCHUELER_NACHNAME, C.SCHUELER_VORNAME },
 				null, null, SchuelerList.DEFAULT_SORT_ORDER_PUPIL);
 
 		mPupilsList = (ListView) findViewById(R.id.pupils_list);
 		SimpleCursorAdapter sca = new SimpleCursorAdapter(this,
 				android.R.layout.simple_list_item_multiple_choice, c,
-				new String[] { Constants.SCHUELER_NACHNAME },
+				new String[] { C.SCHUELER_NACHNAME },
 				new int[] { android.R.id.text1 });
 		sca.setViewBinder(new MyPupilNameListViewBinder());
 		mPupilsList.setAdapter(sca);
@@ -139,17 +139,24 @@ public class KursFehlstundenEditor extends Activity implements
 	public void okClicked(View v) {
 		long[] checkedPupils = mPupilsList.getCheckItemIds();
 
-		Uri uri = Uri.withAppendedPath(Constants.CONTENT_URI, Constants.MISS_SEGMENT);
+		Uri uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT);
 		ContentValues[] values = new ContentValues[checkedPupils.length];
 		int i = 0;
 		for(long l : checkedPupils) {
 			values[i] = new ContentValues(5);
+
+			/* since we need to make queries selecting rows by a specific date
+			 * we need to ensure that misses of the same date have the 
+			 * same millisecond value (thus use a specific time of day for a
+			 * date to save)
+			 */			
 			CalendarTools.resetTime(today);  // set time to 0
-			values[i].put(Constants.MISS_DATUM, today.getTimeInMillis());
-			values[i].put(Constants.MISS_STUNDEN_Z, mHoursAdapter.getItem(mCourseHoursSpinner.getSelectedItemPosition()));
-			values[i].put(Constants.MISS_STUNDEN_NZ, 0);
-			values[i].put(Constants.MISS_STUNDEN_E, 0);
-			values[i++].put(Constants.MISS_SCHUELERID, l);
+			values[i].put(C.MISS_DATUM, today.getTimeInMillis());
+			// here we assume all misses are to count
+			values[i].put(C.MISS_STUNDEN_Z, mHoursAdapter.getItem(mCourseHoursSpinner.getSelectedItemPosition()));
+			values[i].put(C.MISS_STUNDEN_NZ, 0);  
+			values[i].put(C.MISS_STUNDEN_E, 0);
+			values[i++].put(C.MISS_SCHUELERID, l);
 		}
 		getContentResolver().bulkInsert(uri, values);
 		setResult(RESULT_OK);

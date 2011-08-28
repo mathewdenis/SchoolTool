@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bob.school.Schule;
-import org.bob.school.Schule.Constants;
+import org.bob.school.Schule.C;
 import org.bob.school.tools.StringTools;
 
 import android.content.ContentProvider;
@@ -35,65 +35,55 @@ public class SchoolProvider extends ContentProvider {
 	private static final int MISS_ID = 6;
 	private static final int COURSE_MISS = 7;
 
-	private static final class SchuelerDAO {
-		// Begin DB specific
-		public static final String TABLE_CREATE = "create table "
-				+ Constants.SCHUELER_TABLE + " (" + BaseColumns._ID
-				+ " integer primary key autoincrement, "
-				+ Constants.SCHUELER_NACHNAME + " text not null, "
-				+ Constants.SCHUELER_VORNAME + " text not null,"
-				+ Constants.SCHUELER_KURSID + " integer not null,"
-				+ "foreign key (" + Constants.SCHUELER_KURSID + ") references "
-				+ Constants.KURS_TABLE + "(" + BaseColumns._ID + ") ON DELETE CASCADE);";
-		// End DB specific
-	}
+	// Table and View create statements
+	private static final String SCHUELER_TABLE_CREATE = "create table "
+			+ C.SCHUELER_TABLE + " (" + BaseColumns._ID
+			+ " integer primary key autoincrement, " + C.SCHUELER_NACHNAME
+			+ " text not null, " + C.SCHUELER_VORNAME + " text not null,"
+			+ C.SCHUELER_KURSID + " integer not null," + "foreign key ("
+			+ C.SCHUELER_KURSID + ") references " + C.KURS_TABLE + "("
+			+ BaseColumns._ID + ") ON DELETE CASCADE);";
 
-	private static final class KursDAO {
-		// Begin DB specific
-		public static final String TABLE_CREATE = "create table " + Constants.KURS_TABLE
-		+ " (" + BaseColumns._ID + " integer primary key autoincrement, "
-		+ Constants.KURS_NAME + " text not null, "
-		+ Constants.KURS_SDATE + " integer, "
-		+ Constants.KURS_EDATE + " integer, "
-		+ StringTools.arrayToString(Constants.KURS_WDAYS, ", ", null, " integer not null")
-		+ ");";
-		// End DB specific
-	}
+	private static final String KURS_TABLE_CREATE = "create table "
+			+ C.KURS_TABLE
+			+ " ("
+			+ BaseColumns._ID
+			+ " integer primary key autoincrement, "
+			+ C.KURS_NAME
+			+ " text not null, "
+			+ C.KURS_SDATE
+			+ " integer, "
+			+ C.KURS_EDATE
+			+ " integer, "
+			+ StringTools.arrayToString(C.KURS_WDAYS, ", ", null,
+					" integer not null") + ");";
 
-	private static final class MissDAO {
-		// Begin DB specific
-		public static final String TABLE_CREATE = "create table " + Constants.MISS_TABLE
-		+ " (" + BaseColumns._ID + " integer primary key autoincrement, "
-		+ Constants.MISS_DATUM + " integer not null, "
-		+ Constants.MISS_STUNDEN_Z + " integer not null, "
-		+ Constants.MISS_STUNDEN_NZ + " integer not null, "
-		+ Constants.MISS_STUNDEN_E + " integer not null, "
-		+ Constants.MISS_SCHUELERID + " integer not null, "
-		+ "foreign key (" + Constants.MISS_SCHUELERID + ") references "
-		+ Constants.SCHUELER_TABLE + "(" + BaseColumns._ID + ") ON DELETE CASCADE);";
-		// End DB specific
-	}
-// 08-24 18:52:08.891: ERROR/Database(3300): Failure 1 (ambiguous column name: _id) on 0x2953f8 when preparing 'create view versaeumnis_sum as select schueler._id AS _id,sum(stunden) AS sum_stunden,sum(entschuldigt) AS sum_entschuldigt from schueler join versaeumnis on (_id=schuelerid) where zaehlen=1 group by _id order by sum_stunden desc, sum_entschuldigt desc'.
+	private static final String MISS_TABLE_CREATE = "create table "
+			+ C.MISS_TABLE + " (" + BaseColumns._ID
+			+ " integer primary key autoincrement, " + C.MISS_DATUM
+			+ " integer not null, " + C.MISS_STUNDEN_Z + " integer not null, "
+			+ C.MISS_STUNDEN_NZ + " integer not null, " + C.MISS_STUNDEN_E
+			+ " integer not null, " + C.MISS_SCHUELERID + " integer not null, "
+			+ "foreign key (" + C.MISS_SCHUELERID + ") references "
+			+ C.SCHUELER_TABLE + "(" + BaseColumns._ID
+			+ ") ON DELETE CASCADE);";
 
-	private static final class PupilMissOverViewDAO {
-		// Begin DB specific
-		public static final String VIEW_CREATE = "create view " + Constants.PUPIL_MISS_VIEW
-		+ " as select " + Constants.SCHUELER_TABLE + "." + BaseColumns._ID + " AS " + BaseColumns._ID + ","
-		+ "sum(" + Constants.MISS_STUNDEN_Z + ") AS " + Constants.MISS_SUM_STUNDEN_Z + "," 
-		+ "sum(" + Constants.MISS_STUNDEN_NZ + ") AS " + Constants.MISS_SUM_STUNDEN_NZ + "," 
-		+ "sum(" + Constants.MISS_STUNDEN_E + ") AS " + Constants.MISS_SUM_STUNDEN_E 
-		+ " from " + Constants.SCHUELER_TABLE + " join " + Constants.MISS_TABLE
-		+ " on (" +  Constants.SCHUELER_TABLE + "." + BaseColumns._ID + "=" + Constants.MISS_SCHUELERID + ")"
-		+ " group by " + Constants.SCHUELER_TABLE + "." + BaseColumns._ID
-		+ " order by " + Constants.MISS_SUM_STUNDEN_Z + " desc, " + Constants.MISS_SUM_STUNDEN_E + " desc";
-		// End DB specific
-	}
+	private static final String VIEW_CREATE = "create view " + C.PUPIL_MISS_VIEW
+			+ " as select " + C.SCHUELER_TABLE + "." + BaseColumns._ID + " AS "
+			+ BaseColumns._ID + "," + "sum(" + C.MISS_STUNDEN_Z + ") AS "
+			+ C.MISS_SUM_STUNDEN_Z + "," + "sum(" + C.MISS_STUNDEN_NZ + ") AS "
+			+ C.MISS_SUM_STUNDEN_NZ + "," + "sum(" + C.MISS_STUNDEN_E + ") AS "
+			+ C.MISS_SUM_STUNDEN_E + " from " + C.SCHUELER_TABLE + " join "
+			+ C.MISS_TABLE + " on (" + C.SCHUELER_TABLE + "." + BaseColumns._ID
+			+ "=" + C.MISS_SCHUELERID + ")" + " group by " + C.SCHUELER_TABLE
+			+ "." + BaseColumns._ID + " order by " + C.MISS_SUM_STUNDEN_Z
+			+ " desc, " + C.MISS_SUM_STUNDEN_E + " desc";
 
 	private SQLiteOpenHelper db_helper;
 	private static final UriMatcher mUriMatcher;
 
     static {
-    	StringBuilder b = new StringBuilder(Constants.COURSE_SEGMENT);
+    	StringBuilder b = new StringBuilder(C.COURSE_SEGMENT);
     	mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
     	//  .../course
     	mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE);
@@ -102,24 +92,22 @@ public class SchoolProvider extends ContentProvider {
     	//  .../course/#
     	mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE_ID);
 
-    	StringBuilder b2 = new StringBuilder(Constants.MISS_SEGMENT);
+    	StringBuilder b2 = new StringBuilder(C.MISS_SEGMENT);
     	//  .../miss
     	mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), MISS);
     	b2.append("/#");
     	//  .../miss/#    	
     	mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), MISS_ID);
-    	b2 = new StringBuilder(b).append("/").append(Constants.MISS_SEGMENT);
+    	b2 = new StringBuilder(b).append("/").append(C.MISS_SEGMENT);
     	// .../course/#/miss
     	mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), COURSE_MISS);
 
-    	b.append("/").append(Constants.PUPIL_SEGMENT);
+    	b.append("/").append(C.PUPIL_SEGMENT);
     	//  .../course/#/pupil
     	mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE_PUPIL);
     	b.append("/#");
     	//  .../course/#/pupil/#
     	mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), PUPIL_ID);
-
-
     }
 
 	@Override
@@ -131,20 +119,20 @@ public class SchoolProvider extends ContentProvider {
 					int newVersion) {
 	            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
 	                    + newVersion + ", which will destroy all old data");
-	            db.execSQL("DROP TABLE IF EXISTS " + Constants.PUPIL_MISS_VIEW);
-	            db.execSQL("DROP TABLE IF EXISTS " + Constants.MISS_TABLE);	            db.execSQL("DROP TABLE IF EXISTS " + Constants.MISS_TABLE);	            db.execSQL("DROP TABLE IF EXISTS " + Constants.MISS_TABLE);
-	            db.execSQL("DROP TABLE IF EXISTS " + Constants.SCHUELER_TABLE);
-	            db.execSQL("DROP TABLE IF EXISTS " + Constants.KURS_TABLE);
+	            db.execSQL("DROP TABLE IF EXISTS " + C.PUPIL_MISS_VIEW);
+	            db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);	            db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);	            db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);
+	            db.execSQL("DROP TABLE IF EXISTS " + C.SCHUELER_TABLE);
+	            db.execSQL("DROP TABLE IF EXISTS " + C.KURS_TABLE);
 	            onCreate(db);
 			}
 
 			@Override
 			public void onCreate(SQLiteDatabase db) {
 				db.execSQL("PRAGMA foreign_keys=ON;");
-				db.execSQL(KursDAO.TABLE_CREATE);
-				db.execSQL(SchuelerDAO.TABLE_CREATE);
-				db.execSQL(MissDAO.TABLE_CREATE);
-				db.execSQL(PupilMissOverViewDAO.VIEW_CREATE);
+				db.execSQL(KURS_TABLE_CREATE);
+				db.execSQL(SCHUELER_TABLE_CREATE);
+				db.execSQL(MISS_TABLE_CREATE);
+				db.execSQL(VIEW_CREATE);
 			}
 
 			@Override
@@ -169,60 +157,60 @@ public class SchoolProvider extends ContentProvider {
 
 		switch (mUriMatcher.match(uri)) {
 		case COURSE: // path is .../course
-			qb.setTables(Constants.KURS_TABLE);
+			qb.setTables(C.KURS_TABLE);
 			break;
 		case COURSE_ID: // path is .../course/#
-			qb.setTables(Constants.KURS_TABLE);
-			qb.appendWhere(Constants._ID + "=" + uri.getLastPathSegment());
+			qb.setTables(C.KURS_TABLE);
+			qb.appendWhere(C._ID + "=" + uri.getLastPathSegment());
 			break;
 		case COURSE_PUPIL: // path is .../course/#/pupil(?QUERY_SUM_MISS=1)
-			if ("1".equals(uri.getQueryParameter(Constants.QUERY_SUM_MISS)))
+			if ("1".equals(uri.getQueryParameter(C.QUERY_SUM_MISS)))
 				setMissSumsJoin(qb, uri, projection, projMap);
 			else
-				qb.setTables(Constants.SCHUELER_TABLE);
+				qb.setTables(C.SCHUELER_TABLE);
 
-			qb.appendWhere(Constants.SCHUELER_KURSID + "="
+			qb.appendWhere(C.SCHUELER_KURSID + "="
 					+ uri.getPathSegments().get(1));
 			
 			break;
 		case PUPIL_ID: // path is .../course/#/pupil/#(?QUERY_SUM_MISS=1)
-			if ("1".equals(uri.getQueryParameter(Constants.QUERY_SUM_MISS)))
+			if ("1".equals(uri.getQueryParameter(C.QUERY_SUM_MISS)))
 				setMissSumsJoin(qb, uri, projection, projMap);
 			else
-				qb.setTables(Constants.SCHUELER_TABLE);
+				qb.setTables(C.SCHUELER_TABLE);
 
-			qb.appendWhere(Constants.SCHUELER_TABLE + "." + Constants._ID + "="
+			qb.appendWhere(C.SCHUELER_TABLE + "." + C._ID + "="
 					+ uri.getLastPathSegment());
 			break;
 		case MISS: // path is .../miss
-			qb.setTables(Constants.MISS_TABLE);
+			qb.setTables(C.MISS_TABLE);
 			break;
 		case COURSE_MISS: // path is .../course/#/miss
-			qb.setTables(Constants.MISS_TABLE + " JOIN " + Constants.SCHUELER_TABLE
+			qb.setTables(C.MISS_TABLE + " JOIN " + C.SCHUELER_TABLE
 					+ " ON ("
-					+ Constants.SCHUELER_TABLE + "." + Constants._ID + "="
-					+ Constants.MISS_SCHUELERID + ")" );
+					+ C.SCHUELER_TABLE + "." + C._ID + "="
+					+ C.MISS_SCHUELERID + ")" );
 
-			qb.appendWhere(Constants.SCHUELER_KURSID + "="
+			qb.appendWhere(C.SCHUELER_KURSID + "="
 					+ uri.getPathSegments().get(1));
 
 			if ("1".equals(uri
-					.getQueryParameter(Constants.QUERY_DISTINCT_DATES_WITH_ID_HACK))) {
-				groupBy = Constants.MISS_DATUM;
+					.getQueryParameter(C.QUERY_DISTINCT_DATES_WITH_ID_HACK))) {
+				groupBy = C.MISS_DATUM;
 				projection = new String[] {
-						"max(" + Constants.MISS_TABLE + "." + Constants._ID
-								+ ") AS " + Constants._ID,
-						Constants.MISS_DATUM,
-						"sum(" + Constants.MISS_STUNDEN_Z + ") AS "
-								+ Constants.MISS_SUM_STUNDEN_Z,
-						"sum(" + Constants.MISS_STUNDEN_E + ") AS "
-								+ Constants.MISS_SUM_STUNDEN_E };
+						"max(" + C.MISS_TABLE + "." + C._ID
+								+ ") AS " + C._ID,
+						C.MISS_DATUM,
+						"sum(" + C.MISS_STUNDEN_Z + ") AS "
+								+ C.MISS_SUM_STUNDEN_Z,
+						"sum(" + C.MISS_STUNDEN_E + ") AS "
+								+ C.MISS_SUM_STUNDEN_E };
 			}
 
 			break;
 		case MISS_ID: // path is .../miss/#
-			qb.setTables(Constants.MISS_TABLE);
-			qb.appendWhere(Constants._ID + "=" + uri.getLastPathSegment());
+			qb.setTables(C.MISS_TABLE);
+			qb.appendWhere(C._ID + "=" + uri.getLastPathSegment());
 			break;
 		default:
 			throw new IllegalArgumentException("SchoolProvider.query: Unknown URI " + uri);
@@ -235,13 +223,13 @@ public class SchoolProvider extends ContentProvider {
 	}
 
 	private void setMissSumsJoin(SQLiteQueryBuilder qb, Uri uri, String[] projection, Map<String, String> projMap) {
-		qb.setTables(Constants.SCHUELER_TABLE + " LEFT JOIN "
-				+ Constants.PUPIL_MISS_VIEW + " ON ("
-				+ Constants.SCHUELER_TABLE + "." + Constants._ID + "="
-				+ Constants.PUPIL_MISS_VIEW + "." + Constants._ID + ")");
+		qb.setTables(C.SCHUELER_TABLE + " LEFT JOIN "
+				+ C.PUPIL_MISS_VIEW + " ON ("
+				+ C.SCHUELER_TABLE + "." + C._ID + "="
+				+ C.PUPIL_MISS_VIEW + "." + C._ID + ")");
 
 		// use a projection map for ambiguous column names
-		projMap.put(Constants._ID, Constants.SCHUELER_TABLE + "." + Constants._ID);
+		projMap.put(C._ID, C.SCHUELER_TABLE + "." + C._ID);
 		/* fill the projection map with identity mappings for all columns
 		   used in the projection */
 		fillProjMap(projMap, projection);
@@ -270,35 +258,35 @@ public class SchoolProvider extends ContentProvider {
 
 		switch (mUriMatcher.match(uri)) {
 		case COURSE:
-			table = Constants.KURS_TABLE;
-			if (!values.containsKey(Constants.KURS_NAME))
-				values.put(Constants.KURS_NAME, Resources.getSystem()
+			table = C.KURS_TABLE;
+			if (!values.containsKey(C.KURS_NAME))
+				values.put(C.KURS_NAME, Resources.getSystem()
 						.getString(android.R.string.untitled));
-			if (!values.containsKey(Constants.KURS_SDATE))
-				values.put(Constants.KURS_SDATE, now);
-			if (!values.containsKey(Constants.KURS_EDATE))
+			if (!values.containsKey(C.KURS_SDATE))
+				values.put(C.KURS_SDATE, now);
+			if (!values.containsKey(C.KURS_EDATE))
 				                             // now + half a year
-				values.put(Constants.KURS_EDATE, now + 15552000000L);
-			for(String s : Constants.KURS_WDAYS)
+				values.put(C.KURS_EDATE, now + 15552000000L);
+			for(String s : C.KURS_WDAYS)
 				if(!values.containsKey(s))
 					values.put(s, 0);
 			break;
 		case COURSE_PUPIL:
-			table = Constants.SCHUELER_TABLE;
-			if (!values.containsKey(Constants.SCHUELER_NACHNAME)
-					|| !values.containsKey(Constants.SCHUELER_VORNAME))
+			table = C.SCHUELER_TABLE;
+			if (!values.containsKey(C.SCHUELER_NACHNAME)
+					|| !values.containsKey(C.SCHUELER_VORNAME))
 				throw new SQLException("Failed to insert pupil row into " + uri
 						+ ". Missing name information.");
 			else
-				values.put(Constants.SCHUELER_KURSID, uri.getPathSegments().get(1));
+				values.put(C.SCHUELER_KURSID, uri.getPathSegments().get(1));
 			break;
 		case MISS:
-			table = Constants.MISS_TABLE;
-			if (!values.containsKey(Constants.MISS_DATUM)
-					|| !values.containsKey(Constants.MISS_STUNDEN_Z)
-					|| !values.containsKey(Constants.MISS_STUNDEN_NZ)
-					|| !values.containsKey(Constants.MISS_STUNDEN_E)
-					|| !values.containsKey(Constants.MISS_SCHUELERID))
+			table = C.MISS_TABLE;
+			if (!values.containsKey(C.MISS_DATUM)
+					|| !values.containsKey(C.MISS_STUNDEN_Z)
+					|| !values.containsKey(C.MISS_STUNDEN_NZ)
+					|| !values.containsKey(C.MISS_STUNDEN_E)
+					|| !values.containsKey(C.MISS_SCHUELERID))
 				throw new SQLException("Failed to insert miss row into " + uri
 						+ ". Missing non-null information.");
 			break;
@@ -321,15 +309,15 @@ public class SchoolProvider extends ContentProvider {
         String id = uri.getLastPathSegment();
         switch (mUriMatcher.match(uri)) {
         case COURSE_ID:
-            count = db.update(Constants.KURS_TABLE, values, Constants._ID + "=" + id
+            count = db.update(C.KURS_TABLE, values, C._ID + "=" + id
                     + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
             break;
         case PUPIL_ID:
-            count = db.update(Constants.SCHUELER_TABLE, values, Constants._ID + "=" + id
+            count = db.update(C.SCHUELER_TABLE, values, C._ID + "=" + id
                     + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
         	break;
         case MISS_ID:
-            count = db.update(Constants.MISS_TABLE, values, Constants._ID + "=" + id
+            count = db.update(C.MISS_TABLE, values, C._ID + "=" + id
                     + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
             break;
         default:
@@ -347,15 +335,15 @@ public class SchoolProvider extends ContentProvider {
         String id = uri.getLastPathSegment();
         switch (mUriMatcher.match(uri)) {
         case COURSE_ID:
-            count = db.delete(Constants.KURS_TABLE, Constants._ID + "=" + id
+            count = db.delete(C.KURS_TABLE, C._ID + "=" + id
                     + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
             break;
         case PUPIL_ID:
-            count = db.delete(Constants.SCHUELER_TABLE, Constants._ID + "=" + id
+            count = db.delete(C.SCHUELER_TABLE, C._ID + "=" + id
                     + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
             break;
         case MISS_ID:
-            count = db.delete(Constants.MISS_TABLE, Constants._ID + "=" + id
+            count = db.delete(C.MISS_TABLE, C._ID + "=" + id
                     + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
             break;
         default:
@@ -369,25 +357,25 @@ public class SchoolProvider extends ContentProvider {
 	public String getType(Uri uri) {
         switch (mUriMatcher.match(uri)) {
         case COURSE:
-        	return Constants.CONTENT_COURSES_TYPE;
+        	return C.CONTENT_COURSES_TYPE;
 
         case COURSE_ID:
-        	return Constants.CONTENT_COURSE_TYPE;
+        	return C.CONTENT_COURSE_TYPE;
 
         case COURSE_PUPIL:
-        	return Constants.CONTENT_PUPILS_TYPE;
+        	return C.CONTENT_PUPILS_TYPE;
 
         case PUPIL_ID:
-        	return Constants.CONTENT_PUPIL_TYPE;
+        	return C.CONTENT_PUPIL_TYPE;
 
         case MISS:
-        	return Constants.CONTENT_MISSES_TYPE;
+        	return C.CONTENT_MISSES_TYPE;
 
         case MISS_ID:
-        	return Constants.CONTENT_MISS_TYPE;
+        	return C.CONTENT_MISS_TYPE;
 
         case COURSE_MISS:
-        	return Constants.CONTENT_COURSE_MISS_TYPE;
+        	return C.CONTENT_COURSE_MISS_TYPE;
 
         default:
             throw new IllegalArgumentException("SchoolProvider.getType: Unknown URI " + uri);

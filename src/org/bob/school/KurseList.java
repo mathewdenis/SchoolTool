@@ -1,6 +1,6 @@
 package org.bob.school;
 
-import org.bob.school.Schule.Constants;
+import org.bob.school.Schule.C;
 
 import android.app.ListActivity;
 import android.content.ContentUris;
@@ -14,7 +14,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 public class KurseList extends ListActivity {
-	private static final String DEFAULT_SORT_ORDER_KURS = Constants.KURS_NAME;
+	private static final String DEFAULT_SORT_ORDER_KURS = C.KURS_NAME;
     // Identifiers for our menu items.
     public static final int MENU_ITEM_ADD = Menu.FIRST;
     public static final int MENU_ITEM_EDIT = Menu.FIRST + 1;
@@ -26,7 +26,7 @@ public class KurseList extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mUri = Uri.withAppendedPath(Constants.CONTENT_URI, Constants.COURSE_SEGMENT);
+		mUri = Uri.withAppendedPath(C.CONTENT_URI, C.COURSE_SEGMENT);
 
 		// if the activity has just been started, set the content uri
 		// of our content provider as data in the intent 
@@ -40,12 +40,12 @@ public class KurseList extends ListActivity {
 	}
 
 	private void createCourseList() {
-		Cursor c = managedQuery(mUri, new String[] { Constants._ID,
-				Constants.KURS_NAME }, null, null, DEFAULT_SORT_ORDER_KURS);
+		Cursor c = managedQuery(mUri, new String[] { C._ID,
+				C.KURS_NAME }, null, null, DEFAULT_SORT_ORDER_KURS);
 
 		setListAdapter(new SimpleCursorAdapter(this,
 				android.R.layout.simple_list_item_1, c,
-				new String[] { Constants.KURS_NAME },
+				new String[] { C.KURS_NAME },
 				new int[] { android.R.id.text1 }));
 	}
 

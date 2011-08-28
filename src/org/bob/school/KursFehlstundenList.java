@@ -2,7 +2,7 @@ package org.bob.school;
 
 import java.util.Date;
 
-import org.bob.school.Schule.Constants;
+import org.bob.school.Schule.C;
 import org.bob.school.tools.AlertDialogs;
 import org.bob.school.tools.CalendarTools;
 import org.bob.school.tools.SchoolTools;
@@ -29,9 +29,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class KursFehlstundenList extends Activity implements OnChildClickListener {
-	private static final String DEFAULT_SORT_ORDER_MISSES = Constants.MISS_DATUM;
-	private static final String DEFAULT_SORT_ORDER_NAME = Constants.SCHUELER_NACHNAME
-			+ "," + Constants.SCHUELER_VORNAME;
+	private static final String DEFAULT_SORT_ORDER_MISSES = C.MISS_DATUM;
+	private static final String DEFAULT_SORT_ORDER_NAME = C.SCHUELER_NACHNAME
+			+ "," + C.SCHUELER_VORNAME;
 
 	private static final int MENU_ITEM_ADD_MISSES = Menu.FIRST;
 	private static final int MENU_ITEM_EDIT_MISS = Menu.FIRST + 1;
@@ -50,7 +50,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 			int tv_color = tv.getResources().getColor(
 					android.R.color.primary_text_dark);
 			// in this case, the columns are (_id [0], datum [1], miss_count_sum [2], miss_ex_sum [3])
-			if (c.getColumnIndex(Constants.SCHUELER_NACHNAME) == -1) {
+			if (c.getColumnIndex(C.SCHUELER_NACHNAME) == -1) {
 				tv.setText(CalendarTools.dateFormatter.format(new Date(c.getLong(1))));
 
 				// set text color appropriately dependening on whether all
@@ -107,14 +107,14 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		setContentView(mExpListView);
 
 		// append course name to activity title
-		Uri uri = Uri.withAppendedPath(Constants.CONTENT_URI,
-				Constants.COURSE_SEGMENT);
+		Uri uri = Uri.withAppendedPath(C.CONTENT_URI,
+				C.COURSE_SEGMENT);
 		uri = Uri.withAppendedPath(uri, mUri.getPathSegments().get(1));
 		c = getContentResolver().query(uri,
-				new String[] { Constants.KURS_NAME }, null, null, null);
+				new String[] { C.KURS_NAME }, null, null, null);
 		c.moveToFirst();
 		setTitle(getTitle() + ": "
-				+ c.getString(c.getColumnIndex(Constants.KURS_NAME)));
+				+ c.getString(c.getColumnIndex(C.KURS_NAME)));
 		c.close();
 
 		registerForContextMenu(mExpListView);
@@ -125,7 +125,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		c = managedQuery(
 				mUri.buildUpon()
 						.appendQueryParameter(
-								Constants.QUERY_DISTINCT_DATES_WITH_ID_HACK,
+								C.QUERY_DISTINCT_DATES_WITH_ID_HACK,
 								"1").build(), null, null, null,
 				DEFAULT_SORT_ORDER_MISSES);
 		c.setNotificationUri(getContentResolver(), mUri);
@@ -133,23 +133,23 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		// set the expandable list adapter
 		SimpleCursorTreeAdapter cta = new SimpleCursorTreeAdapter(this, c,
 				android.R.layout.simple_expandable_list_item_1,
-				new String[] { Constants._ID },
+				new String[] { C._ID },
 				new int[] { android.R.id.text1 },
 				android.R.layout.simple_expandable_list_item_2,
-				new String[] { Constants.SCHUELER_NACHNAME, Constants.MISS_STUNDEN_Z},
+				new String[] { C.SCHUELER_NACHNAME, C.MISS_STUNDEN_Z},
 				new int[] { android.R.id.text1, android.R.id.text2 }) {
 
 			@Override
 			protected Cursor getChildrenCursor(Cursor groupCursor) {
 				Cursor c = managedQuery(mUri, new String[] {
-						Constants.MISS_TABLE + "." + Constants._ID,
-						Constants.SCHUELER_NACHNAME,
-						Constants.SCHUELER_VORNAME, Constants.MISS_STUNDEN_Z,
-						Constants.MISS_STUNDEN_E,
-						Constants.MISS_STUNDEN_NZ },
-						Constants.MISS_DATUM + "=?",
+						C.MISS_TABLE + "." + C._ID,
+						C.SCHUELER_NACHNAME,
+						C.SCHUELER_VORNAME, C.MISS_STUNDEN_Z,
+						C.MISS_STUNDEN_E,
+						C.MISS_STUNDEN_NZ },
+						C.MISS_DATUM + "=?",
 						new String[] { groupCursor.getString(groupCursor
-								.getColumnIndex(Constants.MISS_DATUM)) },
+								.getColumnIndex(C.MISS_DATUM)) },
 						DEFAULT_SORT_ORDER_NAME);
 				c.setNotificationUri(getContentResolver(), mUri);
 				return c;
@@ -166,17 +166,17 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		// Cursor to selected element
 		Cursor c = (Cursor) mExpListView.getExpandableListAdapter().getChild(
 				groupPos, childPos);
-		int miss = c.getInt(c.getColumnIndex(Constants.MISS_STUNDEN_Z));
-		int miss_ex = c.getInt(c.getColumnIndex(Constants.MISS_STUNDEN_E));
+		int miss = c.getInt(c.getColumnIndex(C.MISS_STUNDEN_Z));
+		int miss_ex = c.getInt(c.getColumnIndex(C.MISS_STUNDEN_E));
 
 		// only toggle when the miss is to be counted
-		if (c.getInt(c.getColumnIndex(Constants.MISS_STUNDEN_NZ)) == 0) {
+		if (c.getInt(c.getColumnIndex(C.MISS_STUNDEN_NZ)) == 0) {
 			if (miss_ex > 0)
 				// there are excused hours, so toggle miss_ex to 0
-				values.put(Constants.MISS_STUNDEN_E, 0);
+				values.put(C.MISS_STUNDEN_E, 0);
 			else
 				// excused hours are 0, so toggle miss_ex to the value of miss
-				values.put(Constants.MISS_STUNDEN_E, miss);
+				values.put(C.MISS_STUNDEN_E, miss);
 
 			getContentResolver().update(SchoolTools.buildMissUri(id), values,
 					null, null);
@@ -190,7 +190,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		Uri uri = Uri.withAppendedPath(Uri.withAppendedPath(
-				Constants.CONTENT_URI, Constants.COURSE_SEGMENT), mUri
+				C.CONTENT_URI, C.COURSE_SEGMENT), mUri
 				.getPathSegments().get(1));
 
 		menu.add(Menu.NONE, MENU_ITEM_ADD_MISSES, 0, R.string.menu_misses_insert)
@@ -215,12 +215,12 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
         if(ptype == ExpandableListView.PACKED_POSITION_TYPE_CHILD) {
         	Cursor c = (Cursor) mExpListView.getExpandableListAdapter().getChild(pgroup, pchild);
 			menuHeader = c.getString(c
-					.getColumnIndex(Constants.SCHUELER_NACHNAME))
-					+ ", " + c.getString(c.getColumnIndex(Constants.SCHUELER_VORNAME));
+					.getColumnIndex(C.SCHUELER_NACHNAME))
+					+ ", " + c.getString(c.getColumnIndex(C.SCHUELER_VORNAME));
 
 			// Edit or delete the miss
 			menu.add(Menu.NONE, MENU_ITEM_EDIT_MISS, 0, R.string.title_fehlstunde_edit)
-					.setIntent(new Intent(FehlstundeEditor.ACTION_ADD_EDIT_MISS,
+					.setIntent(new Intent(FehlstundeEditor.ACTION_EDIT_MISS,
 									      SchoolTools.buildMissUri(info.id)));
 			menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS, 0,
 					R.string.menu_miss_delete);
@@ -228,7 +228,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
         	Cursor c = (Cursor) mExpListView.getExpandableListAdapter().getGroup(pgroup);
 
 			menuHeader = CalendarTools.dateFormatter.format(new Date(c
-					.getLong(c.getColumnIndex(Constants.MISS_DATUM))));
+					.getLong(c.getColumnIndex(C.MISS_DATUM))));
 
 			menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS_ALL, 0, R.string.menu_miss_delete_all);
 		}
@@ -244,7 +244,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		final ExpandableListView.ExpandableListContextMenuInfo info =
 			(ExpandableListView.ExpandableListContextMenuInfo) item.getMenuInfo();
 
-		final Uri uri = Uri.withAppendedPath(Constants.CONTENT_URI, Constants.MISS_SEGMENT);
+		final Uri uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT);
 		
         switch(item.getItemId()) {
         case MENU_ITEM_DELETE_MISS :

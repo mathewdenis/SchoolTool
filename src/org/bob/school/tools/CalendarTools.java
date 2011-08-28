@@ -9,7 +9,7 @@ public class CalendarTools {
 
 	public static final DateFormat dateFormatter = new SimpleDateFormat(dateFormat);
 
-	/**  Reset the time to 0:00.0, date stays unchanged
+	/**  Reset the time to 0:00.0 (i.e. 12:00.0 AM), date stays unchanged
 	 * @param c calendar to reset
 	 */
 	public static void resetTime(Calendar c) {

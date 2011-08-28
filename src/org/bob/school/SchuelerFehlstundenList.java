@@ -2,7 +2,7 @@ package org.bob.school;
 
 import java.util.Date;
 
-import org.bob.school.Schule.Constants;
+import org.bob.school.Schule.C;
 import org.bob.school.tools.AlertDialogs;
 import org.bob.school.tools.CalendarTools;
 import org.bob.school.tools.SchoolTools;
@@ -28,7 +28,7 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class SchuelerFehlstundenList extends Activity implements OnItemClickListener, OnHierarchyChangeListener {
-	private static final String DEFAULT_SORT_ORDER_MISSES = Constants.MISS_DATUM;
+	private static final String DEFAULT_SORT_ORDER_MISSES = C.MISS_DATUM;
 
 	/**
 	 * Special intent action meaning "add misses for a pupil"
@@ -42,7 +42,8 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 	private TextView mPupilName;
 
 	private static final int MENU_ITEM_EDIT_MISS = Menu.FIRST;
-	private static final int MENU_ITEM_DELETE_MISS = Menu.FIRST + 1;
+	private static final int MENU_ITEM_ADD_MISS = Menu.FIRST + 1;	
+	private static final int MENU_ITEM_DELETE_MISS = Menu.FIRST + 2;
 
 	private static class DateBinder implements SimpleCursorAdapter.ViewBinder {
 
@@ -82,10 +83,10 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 		mMissList = (ListView) findViewById(R.id.miss_list);
 
 		// get course name
-		Uri uri = Uri.withAppendedPath(Constants.CONTENT_URI, Constants.COURSE_SEGMENT);
+		Uri uri = Uri.withAppendedPath(C.CONTENT_URI, C.COURSE_SEGMENT);
 		uri = Uri.withAppendedPath(uri, mUri.getPathSegments().get(1));
 		c = getContentResolver().query(uri,
-				new String[] { Constants.KURS_NAME }, null, null, null);
+				new String[] { C.KURS_NAME }, null, null, null);
 		c.moveToFirst();
 		mCourseName.setText(c.getString(0));
 		mPupilName.setText(R.string.title_fehlstunde_edit);
@@ -100,19 +101,19 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 		registerForContextMenu(mMissList);
 		mMissList.setOnItemClickListener(this);
 
-		uri = Uri.withAppendedPath(Constants.CONTENT_URI, Constants.MISS_SEGMENT);
-		c = managedQuery(uri, new String[] { Constants._ID,
-				Constants.MISS_DATUM, Constants.MISS_STUNDEN_Z,
-				Constants.MISS_STUNDEN_E,
-				Constants.MISS_STUNDEN_NZ},
-				Constants.MISS_SCHUELERID + "= ?",
+		uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT);
+		c = managedQuery(uri, new String[] { C._ID,
+				C.MISS_DATUM, C.MISS_STUNDEN_Z,
+				C.MISS_STUNDEN_E,
+				C.MISS_STUNDEN_NZ},
+				C.MISS_SCHUELERID + "= ?",
 				new String[] { mUri.getLastPathSegment() },
 				DEFAULT_SORT_ORDER_MISSES);
 		c.setNotificationUri(getContentResolver(), uri);
 
 		SimpleCursorAdapter ca = new SimpleCursorAdapter(this,
 				android.R.layout.simple_list_item_2, c, new String[] {
-						Constants.MISS_DATUM, Constants.MISS_STUNDEN_Z },
+						C.MISS_DATUM, C.MISS_STUNDEN_Z },
 				new int[] { android.R.id.text1, android.R.id.text2 });
 		ca.setViewBinder(new DateBinder());
 
@@ -129,17 +130,17 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 
 		// Cursor to selected element
 		Cursor c = (Cursor) mMissList.getAdapter().getItem(position);
-		int miss = c.getInt(c.getColumnIndex(Constants.MISS_STUNDEN_Z));
-		int miss_ex = c.getInt(c.getColumnIndex(Constants.MISS_STUNDEN_E));
+		int miss = c.getInt(c.getColumnIndex(C.MISS_STUNDEN_Z));
+		int miss_ex = c.getInt(c.getColumnIndex(C.MISS_STUNDEN_E));
 
 		// only toggle when the miss is to be counted
-		if (c.getInt(c.getColumnIndex(Constants.MISS_STUNDEN_NZ)) == 0) {
+		if (c.getInt(c.getColumnIndex(C.MISS_STUNDEN_NZ)) == 0) {
 			if (miss_ex > 0)
 				// there are excused hours, so toggle miss_ex to 0
-				values.put(Constants.MISS_STUNDEN_E, 0);
+				values.put(C.MISS_STUNDEN_E, 0);
 			else
 				// excused hours are 0, so toggle miss_ex to the value of miss
-				values.put(Constants.MISS_STUNDEN_E, miss);
+				values.put(C.MISS_STUNDEN_E, miss);
 
 			getContentResolver().update(SchoolTools.buildMissUri(id), values, null, null);
 			writePupilsNameAndMissSum();
@@ -150,9 +151,22 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS, 0, R.string.menu_pupil_delete)
-		.setShortcut('1', 'i').setIcon(android.R.drawable.ic_menu_delete);
+		menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS, 0,
+				R.string.menu_pupil_delete).setShortcut('1', 'i')
+				.setIcon(android.R.drawable.ic_menu_delete);
 
+		Uri uri = Uri
+				.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT)
+				.buildUpon()
+				.appendQueryParameter(C.MISS_SCHUELERID,
+						mUri.getLastPathSegment()).build();
+		menu.add(Menu.NONE, MENU_ITEM_ADD_MISS, 0, R.string.menu_misses_insert)
+				.setShortcut('3', 'd')
+				.setIcon(android.R.drawable.ic_menu_close_clear_cancel)
+				.setIntent(
+						new Intent(
+								FehlstundeEditor.ACTION_ADD_MISS,
+								uri));
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -180,11 +194,11 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 
         // Setup the menu header
 		menu.setHeaderTitle(CalendarTools.dateFormatter.format(new Date(cursor
-				.getLong(cursor.getColumnIndex(Constants.MISS_DATUM)))));
+				.getLong(cursor.getColumnIndex(C.MISS_DATUM)))));
 
 		// Edit or delete the miss
 		menu.add(Menu.NONE, MENU_ITEM_EDIT_MISS, 0, R.string.title_fehlstunde_edit)
-				.setIntent(new Intent(FehlstundeEditor.ACTION_ADD_EDIT_MISS,
+				.setIntent(new Intent(FehlstundeEditor.ACTION_EDIT_MISS,
 								      SchoolTools.buildMissUri(info.id)));
 		menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS, 0, R.string.menu_miss_delete);
     }
@@ -200,7 +214,7 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 		switch (item.getItemId()) {
 		case MENU_ITEM_DELETE_MISS:
 			final Uri uri = ContentUris.withAppendedId(Uri.withAppendedPath(
-					Constants.CONTENT_URI, Constants.MISS_SEGMENT), info.id);
+					C.CONTENT_URI, C.MISS_SEGMENT), info.id);
 			AlertDialogs.createDeleteConfirmDialog(this, uri,
 					R.string.dialog_confirm_delete_title,
 					R.string.dialog_confirm_delete_miss, false).show();
@@ -224,11 +238,11 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 		// get pupil name and misses sums
 		Cursor c = getContentResolver().query(
 				mUri.buildUpon()
-						.appendQueryParameter(Constants.QUERY_SUM_MISS, "1")
+						.appendQueryParameter(C.QUERY_SUM_MISS, "1")
 						.build(),
-				new String[] { Constants.SCHUELER_NACHNAME,
-						Constants.SCHUELER_VORNAME, Constants.MISS_SUM_STUNDEN_Z,
-						Constants.MISS_SUM_STUNDEN_E, Constants.MISS_SUM_STUNDEN_NZ }, null, null,
+				new String[] { C.SCHUELER_NACHNAME,
+						C.SCHUELER_VORNAME, C.MISS_SUM_STUNDEN_Z,
+						C.MISS_SUM_STUNDEN_E, C.MISS_SUM_STUNDEN_NZ }, null, null,
 				null);
 
 		c.moveToFirst();

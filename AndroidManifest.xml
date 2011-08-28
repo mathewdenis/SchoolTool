@@ -59,12 +59,16 @@
 				<data android:mimeType="vnd.android.cursor.dir/vnd.bob.course_miss" />
 			</intent-filter>
 		</activity>		
-		<activity android:name=".FehlstundeEditor"
-			android:label="@string/title_fehlstunde_edit">
+		<activity android:name=".FehlstundeEditor" android:label="@string/title_fehlstunde_edit">
 			<intent-filter>
 				<action android:name="org.bob.school.action.EDIT_MISS" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:mimeType="vnd.android.cursor.item/vnd.bob.miss" />
+			</intent-filter>
+			<intent-filter>
+				<action android:name="org.bob.school.action.ADD_MISS" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="vnd.android.cursor.dir/vnd.bob.miss" />
 			</intent-filter>
 		</activity>
 	</application>

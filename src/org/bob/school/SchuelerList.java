@@ -2,7 +2,7 @@ package org.bob.school;
 
 import java.util.regex.Pattern;
 
-import org.bob.school.Schule.Constants;
+import org.bob.school.Schule.C;
 import org.bob.school.tools.AlertDialogs;
 import org.bob.school.tools.StringTools;
 
@@ -31,7 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class SchuelerList extends ListActivity {
-	public static final String DEFAULT_SORT_ORDER_PUPIL = Constants.SCHUELER_NACHNAME + "," + Constants.SCHUELER_VORNAME;
+	public static final String DEFAULT_SORT_ORDER_PUPIL = C.SCHUELER_NACHNAME + "," + C.SCHUELER_VORNAME;
     // Identifiers for our menu items.
     public static final int MENU_ITEM_ADD = Menu.FIRST;
     public static final int MENU_ITEM_EDIT = Menu.FIRST + 1;
@@ -88,14 +88,14 @@ public class SchuelerList extends ListActivity {
 		super.onCreate(savedInstanceState);
 
 		mUri = getIntent().getData();
-		mWorkingUri = Uri.withAppendedPath(mUri, Constants.PUPIL_SEGMENT);
+		mWorkingUri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);
 
 		// get course name
 		Cursor c = getContentResolver().query(mUri,
-				new String[] { Constants.KURS_NAME }, null, null, null);
+				new String[] { C.KURS_NAME }, null, null, null);
 
 		c.moveToFirst();
-		setTitle(getTitle() + ": " + c.getString(c.getColumnIndex(Constants.KURS_NAME)));
+		setTitle(getTitle() + ": " + c.getString(c.getColumnIndex(C.KURS_NAME)));
 		c.close();
 
 		registerForContextMenu(getListView());
@@ -123,20 +123,20 @@ public class SchuelerList extends ListActivity {
 	private void createPupilList() {
 		Uri uri = mWorkingUri
 				.buildUpon()
-				.appendQueryParameter(Constants.QUERY_SUM_MISS, "1").build();
+				.appendQueryParameter(C.QUERY_SUM_MISS, "1").build();
 
-		Cursor c = managedQuery(uri, new String[] { Constants._ID,
-				Constants.SCHUELER_NACHNAME, Constants.SCHUELER_VORNAME,
-				Constants.MISS_SUM_STUNDEN_Z,
-				Constants.MISS_SUM_STUNDEN_E,
-				Constants.MISS_SUM_STUNDEN_NZ}, null, null,
+		Cursor c = managedQuery(uri, new String[] { C._ID,
+				C.SCHUELER_NACHNAME, C.SCHUELER_VORNAME,
+				C.MISS_SUM_STUNDEN_Z,
+				C.MISS_SUM_STUNDEN_E,
+				C.MISS_SUM_STUNDEN_NZ}, null, null,
 				DEFAULT_SORT_ORDER_PUPIL);
 
 		c.setNotificationUri(getContentResolver(), mUri);
 		SimpleCursorAdapter sca = new SimpleCursorAdapter(this,
 				android.R.layout.simple_list_item_2, c,
-				new String[] { Constants.SCHUELER_NACHNAME,
-						Constants.SCHUELER_VORNAME }, new int[] {
+				new String[] { C.SCHUELER_NACHNAME,
+						C.SCHUELER_VORNAME }, new int[] {
 						android.R.id.text1, android.R.id.text2 });
 		sca.setViewBinder(new MyPupilListViewBinder());
 		setListAdapter(sca);
@@ -209,9 +209,9 @@ public class SchuelerList extends ListActivity {
 
         // Setup the menu header
 		menu.setHeaderTitle(c.getString(c
-				.getColumnIndex(Constants.SCHUELER_NACHNAME))
+				.getColumnIndex(C.SCHUELER_NACHNAME))
 				+ ", "
-				+ c.getString(c.getColumnIndex(Constants.SCHUELER_VORNAME)));
+				+ c.getString(c.getColumnIndex(C.SCHUELER_VORNAME)));
 
         // Add a menu item to delete the note
         menu.add(Menu.NONE, MENU_ITEM_EDIT, 0, R.string.menu_pupil_edit);
@@ -233,8 +233,8 @@ public class SchuelerList extends ListActivity {
 		case MENU_ITEM_EDIT:
 			final EditText et = new EditText(getApplicationContext());
 			et.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_CLASS_TEXT);
-			et.setText(c.getString(c.getColumnIndex(Constants.SCHUELER_NACHNAME)) + ", "
-					+ c.getString(c.getColumnIndex(Constants.SCHUELER_VORNAME)));
+			et.setText(c.getString(c.getColumnIndex(C.SCHUELER_NACHNAME)) + ", "
+					+ c.getString(c.getColumnIndex(C.SCHUELER_VORNAME)));
 
 			new AlertDialog.Builder(this)
 					.setTitle(R.string.menu_pupil_edit)
@@ -248,9 +248,9 @@ public class SchuelerList extends ListActivity {
 									String[] name = et.getText().toString()
 											.trim().split("\\s*,\\s*", 2);
 									ContentValues values = new ContentValues(2);
-									values.put(Constants.SCHUELER_NACHNAME,
+									values.put(C.SCHUELER_NACHNAME,
 											name[0]);
-									values.put(Constants.SCHUELER_VORNAME,
+									values.put(C.SCHUELER_VORNAME,
 											name[1]);
 									getContentResolver().update(uri, values,
 											null, null);
@@ -295,8 +295,8 @@ public class SchuelerList extends ListActivity {
 						for(String s : namesToAdd) {
 							String[] nameSep = kommaPattern.split(s, 2);
 							values[i] = new ContentValues();
-							values[i].put(Constants.SCHUELER_NACHNAME, nameSep[0]);
-							values[i++].put(Constants.SCHUELER_VORNAME, nameSep[1]);
+							values[i].put(C.SCHUELER_NACHNAME, nameSep[0]);
+							values[i++].put(C.SCHUELER_VORNAME, nameSep[1]);
 						}
 						if(i>0) {
 							getContentResolver().bulkInsert(mWorkingUri, values);

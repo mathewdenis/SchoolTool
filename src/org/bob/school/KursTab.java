@@ -1,6 +1,6 @@
 package org.bob.school;
 
-import org.bob.school.Schule.Constants;
+import org.bob.school.Schule.C;
 
 import android.app.TabActivity;
 import android.content.Intent;
@@ -24,7 +24,7 @@ public class KursTab extends TabActivity {
 
     	// set the course name as the title of the activity
 		Cursor c = getContentResolver().query(mUri,
-				new String[] { Constants.KURS_NAME }, null, null, null);
+				new String[] { C.KURS_NAME }, null, null, null);
 		c.moveToFirst();
 		setTitle(c.getString(0));
 		c.close();
@@ -34,7 +34,7 @@ public class KursTab extends TabActivity {
 						res.getDrawable(R.drawable.menu_kursliste))
 				.setContent(new Intent(Intent.ACTION_PICK, mUri)));
 
-		Uri uri = Uri.withAppendedPath(mUri, Constants.MISS_SEGMENT);
+		Uri uri = Uri.withAppendedPath(mUri, C.MISS_SEGMENT);
 		tabHost.addTab(tabHost.newTabSpec("misslist")
 				.setIndicator(res.getString(R.string.title_kurs_fehlstunde_list),
 						res.getDrawable(R.drawable.menu_fehlstunde_kursliste))

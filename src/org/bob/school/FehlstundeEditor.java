@@ -2,7 +2,7 @@ package org.bob.school;
 
 import java.util.Calendar;
 
-import org.bob.school.Schule.Constants;
+import org.bob.school.Schule.C;
 import org.bob.school.tools.AlertDialogs;
 import org.bob.school.tools.CalendarTools;
 import org.bob.school.tools.SchoolTools;
@@ -12,6 +12,7 @@ import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,11 +35,14 @@ public class FehlstundeEditor extends PreferenceActivity implements
 	/**
 	 * Special intent action meaning "edit miss"
 	 */
-	public static final String ACTION_ADD_EDIT_MISS = "org.bob.school.action.EDIT_MISS";
+	public static final String ACTION_EDIT_MISS = "org.bob.school.action.EDIT_MISS";
+	public static final String ACTION_ADD_MISS = "org.bob.school.action.ADD_MISS";
 
 	private static final int MENU_ITEM_DELETE = Menu.FIRST;
 
-	private Uri mUri; // data: .../miss/# (MISS_ID)
+	// data: .../miss/# (MISS_ID)  (MISS_EDIT)
+	//       .../miss   (MISS)     (MISS_ADD)
+	private Uri mUri;
 	private Calendar mDatum;
 	private ListPreference mMiss;
 	private ListPreference mMissExcused;
@@ -48,8 +52,9 @@ public class FehlstundeEditor extends PreferenceActivity implements
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
+		Intent intent = getIntent();
 
-		mUri = getIntent().getData();
+		mUri = intent.getData();
 
 		setContentView(R.layout.save_cancel_preference);
 		addPreferencesFromResource(R.xml.fehlstunde_edit_preferences);
@@ -63,11 +68,16 @@ public class FehlstundeEditor extends PreferenceActivity implements
 
 		mDatePref = findPreference("date");
 		mDatePref.setOnPreferenceClickListener(this);
+		mDatum = Calendar.getInstance();
+		Cursor c = null;
 
-		Cursor c = getContentResolver().query(mUri, null, null, null, null);
+		if (ACTION_EDIT_MISS.equals(intent.getAction()))
+			c = getContentResolver().query(mUri, null, null, null, null);
+
 		guiUpdatePrefs(c);
+		if(c != null)
+			c.close();
 	}
-
 	// Someone clicked on a preference list element. This is only interesting
 	// if a date preference element has been clicked since we have to show
 	// a date picker.
@@ -120,12 +130,23 @@ public class FehlstundeEditor extends PreferenceActivity implements
 	public void okClicked(View v) {
 		ContentValues values = new ContentValues();
 
+		/* since we need to make queries selecting rows by a specific date
+		 * we need to ensure that misses of the same date have the 
+		 * same millisecond value (thus use a specific time of day for a
+		 * date to save)
+		 */
 		CalendarTools.resetTime(mDatum);
-		values.put(Constants.MISS_DATUM, mDatum.getTimeInMillis());
+		values.put(C.MISS_DATUM, mDatum.getTimeInMillis());
 		values.put(SchoolTools.buildMissColumn(mCount.isChecked()), mMiss.getValue());
 		values.put(SchoolTools.buildMissColumn(!mCount.isChecked()), 0);
-		values.put(Constants.MISS_STUNDEN_E, mMissExcused.getValue());
-		getContentResolver().update(mUri, values, null, null);
+		values.put(C.MISS_STUNDEN_E, mMissExcused.getValue());
+
+		if(ACTION_ADD_MISS.equals(getIntent().getAction())) {
+			values.put(C.MISS_SCHUELERID, mUri.getQueryParameter(C.MISS_SCHUELERID));
+			getContentResolver().insert(mUri, values);
+		} else
+			getContentResolver().update(mUri, values, null, null);
+
 		setResult(RESULT_OK);
 		finish();
 	}
@@ -163,19 +184,25 @@ public class FehlstundeEditor extends PreferenceActivity implements
 	}
 
 	private void guiUpdatePrefs(Cursor c) {
-		c.moveToFirst();
-		int miss_z = c.getInt(c.getColumnIndex(Constants.MISS_STUNDEN_Z));
-		int miss_nz = c.getInt(c.getColumnIndex(Constants.MISS_STUNDEN_NZ));
-		mMiss.setValue(String.valueOf(Math.max(miss_z, miss_nz)));
-		mMiss.setSummary(mMiss.getValue());
-		mMissExcused.setValue(c.getString(c
-				.getColumnIndex(Constants.MISS_STUNDEN_E)));
-		mMissExcused.setSummary(mMissExcused.getValue());
-		mCount.setChecked(c.getInt(c.getColumnIndex(Constants.MISS_STUNDEN_NZ)) == 0);
-		mDatum = Calendar.getInstance();
-		mDatum.setTimeInMillis(c.getLong(c.getColumnIndex(Constants.MISS_DATUM)));
+		if (c == null) {
+			mMiss.setValue("1");
+			mMiss.setSummary("1");
+			mCount.setChecked(true);
+			mMissExcused.setValue("0");
+			mMissExcused.setSummary("0");
+		} else {
+			c.moveToFirst();
+			int miss_z = c.getInt(c.getColumnIndex(C.MISS_STUNDEN_Z));
+			int miss_nz = c.getInt(c.getColumnIndex(C.MISS_STUNDEN_NZ));
+			mMiss.setValue(String.valueOf(Math.max(miss_z, miss_nz)));
+			mMiss.setSummary(mMiss.getValue());
+			mMissExcused.setValue(c.getString(c
+					.getColumnIndex(C.MISS_STUNDEN_E)));
+			mMissExcused.setSummary(mMissExcused.getValue());
+			mCount.setChecked(c.getInt(c.getColumnIndex(C.MISS_STUNDEN_NZ)) == 0);
+			mDatum.setTimeInMillis(c.getLong(c.getColumnIndex(C.MISS_DATUM)));
+		}
 		mDatePref.setSummary(DateFormat.getDateFormat(this).format(
 				mDatum.getTime()));
-		c.close();
 	}
 }

@@ -6,7 +6,7 @@ import android.provider.BaseColumns;
 public class Schule {
 	public static final String AUTHORITY = "org.bob.provider.school";
 
-	public static final class Constants implements BaseColumns {
+	public static final class C implements BaseColumns {
 		/**
 		 * The content:// style URI
 		 */

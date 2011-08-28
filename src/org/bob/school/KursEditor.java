@@ -3,7 +3,7 @@ package org.bob.school;
 import java.sql.Date;
 import java.util.Calendar;
 
-import org.bob.school.Schule.Constants;
+import org.bob.school.Schule.C;
 
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
@@ -89,7 +89,7 @@ public class KursEditor extends PreferenceActivity implements
         mCourseNameEP = (EditTextPreference)findPreference("name");
         mCourseNameEP.setOnPreferenceChangeListener(this);
         for(int i=0; i<5; ++i) {
-        	mWeekdayLP[i] = (ListPreference)findPreference(Constants.KURS_WDAYS[i]);
+        	mWeekdayLP[i] = (ListPreference)findPreference(C.KURS_WDAYS[i]);
         	mWeekdayLP[i].setOnPreferenceChangeListener(this);
         }
         
@@ -167,11 +167,11 @@ public class KursEditor extends PreferenceActivity implements
 	// as described in the save_cancel_list_view-xml-file
 	public void okClicked(View v) {
 		ContentValues values = new ContentValues();
-		values.put(Constants.KURS_NAME, mCourseNameEP.getText());
-		values.put(Constants.KURS_SDATE, mStartDate.getTime());
-		values.put(Constants.KURS_EDATE, mEndDate.getTime());
+		values.put(C.KURS_NAME, mCourseNameEP.getText());
+		values.put(C.KURS_SDATE, mStartDate.getTime());
+		values.put(C.KURS_EDATE, mEndDate.getTime());
 		for(int i=0; i<5; ++i)
-			values.put(Constants.KURS_WDAYS[i], mWeekdayLP[i].getValue());
+			values.put(C.KURS_WDAYS[i], mWeekdayLP[i].getValue());
 
 		getContentResolver().update(mUri, values, null, null);
 		setResult(RESULT_OK);
@@ -191,29 +191,29 @@ public class KursEditor extends PreferenceActivity implements
 	private void guiUpdatePrefs(Cursor c) {
 		c.moveToFirst();
 		String cName = c.getString(c
-				.getColumnIndex(Constants.KURS_NAME));
+				.getColumnIndex(C.KURS_NAME));
 		mCourseNameEP.setText(cName);
 		mCourseNameEP.setSummary(cName);
 
 		for (int i = 0; i < 5; ++i) {
 			mWeekdayLP[i].setValue(c.getString(c
-					.getColumnIndex(Constants.KURS_WDAYS[i])));
+					.getColumnIndex(C.KURS_WDAYS[i])));
 			onPreferenceChange(mWeekdayLP[i], mWeekdayLP[i].getValue());
 		}
 
 		mEditDate = Calendar.getInstance();
-		if (c.isNull(c.getColumnIndex(Constants.KURS_SDATE)))
+		if (c.isNull(c.getColumnIndex(C.KURS_SDATE)))
 			mStartDate = new Date(mEditDate.getTimeInMillis());
 		else
 			mStartDate = new Date(c.getLong(c
-					.getColumnIndex(Constants.KURS_SDATE)));
+					.getColumnIndex(C.KURS_SDATE)));
 
 		mEditDate.add(Calendar.MONTH, 6);
-		if (c.isNull(c.getColumnIndex(Constants.KURS_EDATE)))
+		if (c.isNull(c.getColumnIndex(C.KURS_EDATE)))
 			mEndDate = new Date(mEditDate.getTimeInMillis());
 		else
 			mEndDate = new Date(c.getLong(c
-					.getColumnIndex(Constants.KURS_EDATE)));
+					.getColumnIndex(C.KURS_EDATE)));
 		c.close();
 
 		Preference pref = findPreference("startdate");
