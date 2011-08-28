@@ -12,6 +12,8 @@ import android.widget.TabHost;
 
 public class KursTab extends TabActivity {
 
+	public static final String ACTION_VIEW_COURSE = "org.bob.school.action.VIEW_COURSE";
+
 	private Uri mUri;    // data:   .../course/#  (COURSE_ID)
 
 	@Override
@@ -28,17 +30,20 @@ public class KursTab extends TabActivity {
 		c.moveToFirst();
 		setTitle(c.getString(0));
 		c.close();
-
+		Intent intent = new Intent(Intent.ACTION_VIEW, mUri);
+		intent.addCategory(Intent.CATEGORY_TAB);
 		tabHost.addTab(tabHost.newTabSpec("pupillist")
 				.setIndicator(res.getString(R.string.title_kurs_list),
 						res.getDrawable(R.drawable.menu_kursliste))
-				.setContent(new Intent(Intent.ACTION_PICK, mUri)));
+				.setContent(intent));
 
 		Uri uri = Uri.withAppendedPath(mUri, C.MISS_SEGMENT);
+		intent = new Intent(Intent.ACTION_VIEW, uri);
+		intent.addCategory(Intent.CATEGORY_TAB);
 		tabHost.addTab(tabHost.newTabSpec("misslist")
 				.setIndicator(res.getString(R.string.title_kurs_fehlstunde_list),
 						res.getDrawable(R.drawable.menu_fehlstunde_kursliste))
-				.setContent(new Intent(Intent.ACTION_PICK, uri)));
+				.setContent(intent));
     }
 
 	@Override

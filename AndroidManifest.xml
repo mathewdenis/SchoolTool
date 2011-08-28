@@ -32,7 +32,7 @@
 		</activity>
 		<activity android:name=".SchuelerFehlstundenList">
 			<intent-filter>
-				<action android:name="android.intent.action.PICK" />				
+				<action android:name="android.intent.action.VIEW" />				
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:mimeType="vnd.android.cursor.item/vnd.bob.pupil" />
 			</intent-filter>
@@ -40,33 +40,35 @@
 
 		<activity android:name=".KursTab">
 			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
+				<action android:name="org.bob.school.action.VIEW_COURSE" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
 			</intent-filter>
 		</activity>
 		<activity android:name=".SchuelerList" android:label="@string/title_pupil_list">
 			<intent-filter>
-				<action android:name="android.intent.action.PICK" />
+				<action android:name="android.intent.action.VIEW" />
 				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.TAB" />
 				<data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
 			</intent-filter>
 		</activity>
 		<activity android:name=".KursFehlstundenList" android:label="@string/title_kurs_fehlstunde_list">
 			<intent-filter>
-				<action android:name="android.intent.action.PICK" />
+				<action android:name="android.intent.action.VIEW" />
 				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.TAB" />
 				<data android:mimeType="vnd.android.cursor.dir/vnd.bob.course_miss" />
 			</intent-filter>
 		</activity>		
 		<activity android:name=".FehlstundeEditor" android:label="@string/title_fehlstunde_edit">
 			<intent-filter>
-				<action android:name="org.bob.school.action.EDIT_MISS" />
+				<action android:name="android.intent.action.EDIT" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:mimeType="vnd.android.cursor.item/vnd.bob.miss" />
 			</intent-filter>
 			<intent-filter>
-				<action android:name="org.bob.school.action.ADD_MISS" />
+				<action android:name="android.intent.action.INSERT" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:mimeType="vnd.android.cursor.dir/vnd.bob.miss" />
 			</intent-filter>

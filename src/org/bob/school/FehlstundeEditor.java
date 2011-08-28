@@ -35,8 +35,7 @@ public class FehlstundeEditor extends PreferenceActivity implements
 	/**
 	 * Special intent action meaning "edit miss"
 	 */
-	public static final String ACTION_EDIT_MISS = "org.bob.school.action.EDIT_MISS";
-	public static final String ACTION_ADD_MISS = "org.bob.school.action.ADD_MISS";
+//	public static final String ACTION_ADD_MISS = "org.bob.school.action.ADD_MISS";
 
 	private static final int MENU_ITEM_DELETE = Menu.FIRST;
 
@@ -71,7 +70,7 @@ public class FehlstundeEditor extends PreferenceActivity implements
 		mDatum = Calendar.getInstance();
 		Cursor c = null;
 
-		if (ACTION_EDIT_MISS.equals(intent.getAction()))
+		if (Intent.ACTION_EDIT.equals(intent.getAction()))
 			c = getContentResolver().query(mUri, null, null, null, null);
 
 		guiUpdatePrefs(c);
@@ -141,9 +140,11 @@ public class FehlstundeEditor extends PreferenceActivity implements
 		values.put(SchoolTools.buildMissColumn(!mCount.isChecked()), 0);
 		values.put(C.MISS_STUNDEN_E, mMissExcused.getValue());
 
-		if(ACTION_ADD_MISS.equals(getIntent().getAction())) {
+		if(Intent.ACTION_INSERT.equals(getIntent().getAction())) {
 			values.put(C.MISS_SCHUELERID, mUri.getQueryParameter(C.MISS_SCHUELERID));
-			getContentResolver().insert(mUri, values);
+			Uri uri = getContentResolver().insert(mUri, values);
+			getIntent().setData(uri);
+			setResult(RESULT_OK, getIntent());
 		} else
 			getContentResolver().update(mUri, values, null, null);
 

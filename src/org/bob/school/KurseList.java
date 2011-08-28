@@ -18,7 +18,7 @@ public class KurseList extends ListActivity {
     // Identifiers for our menu items.
     public static final int MENU_ITEM_ADD = Menu.FIRST;
     public static final int MENU_ITEM_EDIT = Menu.FIRST + 1;
-    public static final int MENU_ITEM_PICK = Menu.FIRST + 2;
+    public static final int MENU_ITEM_VIEW = Menu.FIRST + 2;
 
     private Uri mUri;
     
@@ -54,7 +54,7 @@ public class KurseList extends ListActivity {
 		super.onListItemClick(l, v, position, id);
 
         Uri uri = ContentUris.withAppendedId(mUri, id);
-        startActivity(new Intent(Intent.ACTION_VIEW, uri));	
+        startActivity(new Intent(KursTab.ACTION_VIEW_COURSE, uri));	
 	}
 
     @Override
@@ -68,28 +68,28 @@ public class KurseList extends ListActivity {
 		return super.onCreateOptionsMenu(menu);
 	}
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        final long id = getSelectedItemId();
-
-        menu.removeGroup(Menu.CATEGORY_CONTAINER);
-
-        // bad code: depending on edit-mode (when there are devices without
-        // a keyboard) -- actually, this is unnecessary
-        // if something is selected, display pick and edit menu
-        if(id != Long.MIN_VALUE) {
-            Uri uri = ContentUris.withAppendedId(mUri, id);
-			menu.add(Menu.CATEGORY_CONTAINER, MENU_ITEM_EDIT, 0,
-					R.string.menu_course_edit).setShortcut('2', 'e')
-					.setIcon(android.R.drawable.ic_menu_edit)
-					.setIntent(new Intent(Intent.ACTION_EDIT, uri));
-
-			menu.add(Menu.CATEGORY_CONTAINER, MENU_ITEM_PICK, 0,
-					R.string.menu_course_pick).setShortcut('3', 'p')
-					.setIcon(android.R.drawable.ic_menu_info_details)
-					.setIntent(new Intent(Intent.ACTION_PICK, uri));
-        }
-
-    	return super.onPrepareOptionsMenu(menu);
-    }
+//    @Override
+//    public boolean onPrepareOptionsMenu(Menu menu) {
+//        final long id = getSelectedItemId();
+//
+//        menu.removeGroup(Menu.CATEGORY_CONTAINER);
+//
+//        // bad code: depending on edit-mode (when there are devices without
+//        // a keyboard) -- actually, this is unnecessary
+//        // if something is selected, display pick and edit menu
+//        if(id != Long.MIN_VALUE) {
+//            Uri uri = ContentUris.withAppendedId(mUri, id);
+//			menu.add(Menu.CATEGORY_CONTAINER, MENU_ITEM_EDIT, 0,
+//					R.string.menu_course_edit).setShortcut('2', 'e')
+//					.setIcon(android.R.drawable.ic_menu_edit)
+//					.setIntent(new Intent(Intent.ACTION_EDIT, uri));
+//
+//			menu.add(Menu.CATEGORY_CONTAINER, MENU_ITEM_VIEW, 0,
+//					R.string.menu_course_pick).setShortcut('3', 'p')
+//					.setIcon(android.R.drawable.ic_menu_info_details)
+//					.setIntent(new Intent(Intent.ACTION_VIEW, uri));
+//        }
+//
+//    	return super.onPrepareOptionsMenu(menu);
+//    }
 }

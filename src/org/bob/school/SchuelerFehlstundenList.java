@@ -93,14 +93,11 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 
 		c.close();
 
-		// pupil information cursor
-
-
 		writePupilsNameAndMissSum();
-
 		registerForContextMenu(mMissList);
 		mMissList.setOnItemClickListener(this);
 
+		// pupil information cursor
 		uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT);
 		c = managedQuery(uri, new String[] { C._ID,
 				C.MISS_DATUM, C.MISS_STUNDEN_Z,
@@ -163,10 +160,7 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 		menu.add(Menu.NONE, MENU_ITEM_ADD_MISS, 0, R.string.menu_misses_insert)
 				.setShortcut('3', 'd')
 				.setIcon(android.R.drawable.ic_menu_close_clear_cancel)
-				.setIntent(
-						new Intent(
-								FehlstundeEditor.ACTION_ADD_MISS,
-								uri));
+				.setIntent(new Intent(Intent.ACTION_INSERT, uri));
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -198,7 +192,7 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 
 		// Edit or delete the miss
 		menu.add(Menu.NONE, MENU_ITEM_EDIT_MISS, 0, R.string.title_fehlstunde_edit)
-				.setIntent(new Intent(FehlstundeEditor.ACTION_EDIT_MISS,
+				.setIntent(new Intent(Intent.ACTION_EDIT,
 								      SchoolTools.buildMissUri(info.id)));
 		menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS, 0, R.string.menu_miss_delete);
     }

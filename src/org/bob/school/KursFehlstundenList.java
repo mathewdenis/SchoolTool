@@ -220,7 +220,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 
 			// Edit or delete the miss
 			menu.add(Menu.NONE, MENU_ITEM_EDIT_MISS, 0, R.string.title_fehlstunde_edit)
-					.setIntent(new Intent(FehlstundeEditor.ACTION_EDIT_MISS,
+					.setIntent(new Intent(Intent.ACTION_EDIT,
 									      SchoolTools.buildMissUri(info.id)));
 			menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS, 0,
 					R.string.menu_miss_delete);
