@@ -8,7 +8,7 @@
 	<TextView android:textAppearance="?android:attr/textAppearanceMediumInverse"
 		android:background="#d6d6d6" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:id="@+id/pupil_name"
-		android:layout_marginTop="14sp" />
+		android:layout_marginTop="14sp" android:text="@string/menu_misses"/>
 	<ListView android:layout_height="fill_parent"
 		android:layout_width="fill_parent"
 		android:id="@+id/miss_list"

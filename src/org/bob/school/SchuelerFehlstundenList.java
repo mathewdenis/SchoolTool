@@ -39,7 +39,6 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 	private Uri mUri;      // data: .../course/#/pupil/# (PUPIL_ID)
 	private ListView mMissList;
 	private TextView mCourseName;
-	private TextView mPupilName;
 
 	private static final int MENU_ITEM_EDIT_MISS = Menu.FIRST;
 	private static final int MENU_ITEM_ADD_MISS = Menu.FIRST + 1;	
@@ -50,11 +49,13 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 		@Override
 		public boolean setViewValue(View view, Cursor c, int columnIndex) {
 			TextView tv = (TextView) view;
+			int tv_color = tv.getResources().getColor(
+					android.R.color.primary_text_dark);
 
 			/* cursor has the columns
 			_id[0], miss_datum[1], miss_count[2], miss_ex[3], miss_ncount[4] */
 			if(c.getInt(4)==0 && c.getInt(2) != c.getInt(3))
-				tv.setTextColor(tv.getResources().getColor(R.color.color_unexcused));
+				tv_color = tv.getResources().getColor(R.color.color_unexcused);
 //			else if(c.getInt(4)==0)
 //				tv.setTextColor(tv.getResources().getColor(R.color.color_excused));
 
@@ -64,6 +65,7 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 			else // view describes the misses
 				tv.setText(c.getString(2) + "/" +  c.getString(4) + "/"
 						+ c.getShort(3));
+			tv.setTextColor(tv_color);
 
 			return true;
 		}
@@ -78,7 +80,6 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 		setContentView(R.layout.pupil_miss_layout);
 
 		mUri = getIntent().getData();
-		mPupilName = (TextView) findViewById(R.id.pupil_name);
 		mCourseName = (TextView) findViewById(R.id.course_name);
 		mMissList = (ListView) findViewById(R.id.miss_list);
 
@@ -89,7 +90,6 @@ public class SchuelerFehlstundenList extends Activity implements OnItemClickList
 				new String[] { C.KURS_NAME }, null, null, null);
 		c.moveToFirst();
 		mCourseName.setText(c.getString(0));
-		mPupilName.setText(R.string.title_fehlstunde_edit);
 
 		c.close();
 
