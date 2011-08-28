@@ -14,6 +14,7 @@ import android.content.UriMatcher;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
@@ -24,7 +25,7 @@ import android.util.Log;
 
 public class SchoolProvider extends ContentProvider {
 	public static final String DATABASE_NAME = "schooltool.db";
-	public static final int DATABASE_VERSION = 1;
+	public static final int DATABASE_VERSION = 2;
 	public static final String TAG = "SchoolProvider";
 
 	private static final int COURSE = 1;
@@ -42,7 +43,7 @@ public class SchoolProvider extends ContentProvider {
 			+ " text not null, " + C.SCHUELER_VORNAME + " text not null,"
 			+ C.SCHUELER_KURSID + " integer not null," + "foreign key ("
 			+ C.SCHUELER_KURSID + ") references " + C.KURS_TABLE + "("
-			+ BaseColumns._ID + ") ON DELETE CASCADE);";
+			+ BaseColumns._ID + ") ON DELETE CASCADE)";
 
 	private static final String KURS_TABLE_CREATE = "create table "
 			+ C.KURS_TABLE
@@ -56,7 +57,7 @@ public class SchoolProvider extends ContentProvider {
 			+ C.KURS_EDATE
 			+ " integer, "
 			+ StringTools.arrayToString(C.KURS_WDAYS, ", ", null,
-					" integer not null") + ");";
+					" integer not null") + ")";
 
 	private static final String MISS_TABLE_CREATE = "create table "
 			+ C.MISS_TABLE + " (" + BaseColumns._ID
@@ -64,11 +65,14 @@ public class SchoolProvider extends ContentProvider {
 			+ " integer not null, " + C.MISS_STUNDEN_Z + " integer not null, "
 			+ C.MISS_STUNDEN_NZ + " integer not null, " + C.MISS_STUNDEN_E
 			+ " integer not null, " + C.MISS_SCHUELERID + " integer not null, "
+			+ C.MISS_GRUND + " integer not null default 0, "
+			+ C.MISS_BEMERKUNG + " text, "
 			+ "foreign key (" + C.MISS_SCHUELERID + ") references "
 			+ C.SCHUELER_TABLE + "(" + BaseColumns._ID
-			+ ") ON DELETE CASCADE);";
+			+ ") ON DELETE CASCADE, "
+			+ "unique (" + C.MISS_DATUM + ", " + C.MISS_SCHUELERID + ", " + C.MISS_GRUND + "))";
 
-	private static final String VIEW_CREATE = "create view " + C.PUPIL_MISS_VIEW
+	private static final String MISS_VIEW_CREATE = "create view " + C.PUPIL_MISS_VIEW
 			+ " as select " + C.SCHUELER_TABLE + "." + BaseColumns._ID + " AS "
 			+ BaseColumns._ID + "," + "sum(" + C.MISS_STUNDEN_Z + ") AS "
 			+ C.MISS_SUM_STUNDEN_Z + "," + "sum(" + C.MISS_STUNDEN_NZ + ") AS "
@@ -117,13 +121,33 @@ public class SchoolProvider extends ContentProvider {
 			@Override
 			public void onUpgrade(SQLiteDatabase db, int oldVersion,
 					int newVersion) {
-	            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-	                    + newVersion + ", which will destroy all old data");
-	            db.execSQL("DROP TABLE IF EXISTS " + C.PUPIL_MISS_VIEW);
-	            db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);	            db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);	            db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);
-	            db.execSQL("DROP TABLE IF EXISTS " + C.SCHUELER_TABLE);
-	            db.execSQL("DROP TABLE IF EXISTS " + C.KURS_TABLE);
-	            onCreate(db);
+		        Log.i(TAG, "Upgrading DB from version " + oldVersion
+		                + " to " + newVersion);
+				if(oldVersion<2) {
+					upgrade1(db);
+				}
+//	            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
+//	                    + newVersion + ", which will destroy all old data");
+//	            db.execSQL("DROP TABLE IF EXISTS " + C.PUPIL_MISS_VIEW);
+//	            db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);
+//	            db.execSQL("DROP TABLE IF EXISTS " + C.SCHUELER_TABLE);
+//	            db.execSQL("DROP TABLE IF EXISTS " + C.KURS_TABLE);
+//	            onCreate(db);
+//				}
+			}
+
+			private void upgrade1(SQLiteDatabase db) {
+				db.beginTransaction();
+				db.execSQL("ALTER TABLE versaeumnis ADD grund integer not null default 0");
+				db.execSQL("ALTER TABLE versaeumnis ADD bemerkung text");
+				try {
+					db.execSQL("CREATE UNIQUE INDEX datum_schueler_grund_uq ON"
+							+ " versaeumnis (datum, schuelerid, grund)");
+					db.setTransactionSuccessful();
+				} catch (SQLiteConstraintException e) {
+					Log.e(TAG, e.getMessage());
+				}
+				db.endTransaction();
 			}
 
 			@Override
@@ -132,7 +156,7 @@ public class SchoolProvider extends ContentProvider {
 				db.execSQL(KURS_TABLE_CREATE);
 				db.execSQL(SCHUELER_TABLE_CREATE);
 				db.execSQL(MISS_TABLE_CREATE);
-				db.execSQL(VIEW_CREATE);
+				db.execSQL(MISS_VIEW_CREATE);
 			}
 
 			@Override

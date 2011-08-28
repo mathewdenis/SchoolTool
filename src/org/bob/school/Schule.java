@@ -91,6 +91,8 @@ public class Schule {
 		public static final String MISS_STUNDEN_NZ = "std_nz";  // nicht zaehlen
 		public static final String MISS_STUNDEN_E = "std_e";    // entschuldigt
 		public static final String MISS_SCHUELERID = "schuelerid";
+		public static final String MISS_GRUND = "grund";
+		public static final String MISS_BEMERKUNG = "bemerkung";
 
 		public static final String PUPIL_MISS_VIEW = "schueler_versaeumnis_sum";
 		public static final String MISS_SUM_STUNDEN_Z = "sum_std_z";
