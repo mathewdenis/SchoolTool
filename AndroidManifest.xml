@@ -10,14 +10,14 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name=".KursEditor" android:label="@string/title_kurs_edit">
+		<activity android:name=".KursEditor">
 			<!-- Edit a single course item -->
-			<intent-filter android:label="@string/resolv_kurs_edit">
+			<intent-filter android:label="@string/title_kurs_edit">
 				<action android:name="android.intent.action.EDIT" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
 			</intent-filter>
-			<intent-filter>
+			<intent-filter android:label="@string/title_kurs_insert">
 				<action android:name="android.intent.action.INSERT" />
 				<category android:name="android.intent.category.DEFAULT" />
 				<data android:mimeType="vnd.android.cursor.dir/vnd.bob.course" />

@@ -1,6 +1,7 @@
 package org.bob.school;
 
 import org.bob.school.Schule.C;
+import org.bob.school.tools.AlertDialogs;
 
 import android.app.ListActivity;
 import android.content.ContentUris;
@@ -8,19 +9,24 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 
 public class KurseList extends ListActivity {
 	private static final String DEFAULT_SORT_ORDER_KURS = C.KURS_NAME;
     // Identifiers for our menu items.
-    public static final int MENU_ITEM_ADD = Menu.FIRST;
-    public static final int MENU_ITEM_EDIT = Menu.FIRST + 1;
-    public static final int MENU_ITEM_VIEW = Menu.FIRST + 2;
+    public static final int MENU_ITEM_VIEW = Menu.FIRST;
+    public static final int MENU_ITEM_ADD = Menu.FIRST + 1;
+    public static final int MENU_ITEM_EDIT = Menu.FIRST + 2;
+    public static final int MENU_ITEM_DELETE = Menu.FIRST + 3;
 
-    private Uri mUri;
+    private Uri mUri;  // data: .../course  (COURSE)
     
 	/** Called when the activity is first created. */
 	@Override
@@ -34,6 +40,8 @@ public class KurseList extends ListActivity {
         if (intent.getData() == null) {
             intent.setData(mUri);
         }
+
+        registerForContextMenu(this.getListView());
 
 		setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
 		createCourseList();
@@ -68,28 +76,43 @@ public class KurseList extends ListActivity {
 		return super.onCreateOptionsMenu(menu);
 	}
 
-//    @Override
-//    public boolean onPrepareOptionsMenu(Menu menu) {
-//        final long id = getSelectedItemId();
-//
-//        menu.removeGroup(Menu.CATEGORY_CONTAINER);
-//
-//        // bad code: depending on edit-mode (when there are devices without
-//        // a keyboard) -- actually, this is unnecessary
-//        // if something is selected, display pick and edit menu
-//        if(id != Long.MIN_VALUE) {
-//            Uri uri = ContentUris.withAppendedId(mUri, id);
-//			menu.add(Menu.CATEGORY_CONTAINER, MENU_ITEM_EDIT, 0,
-//					R.string.menu_course_edit).setShortcut('2', 'e')
-//					.setIcon(android.R.drawable.ic_menu_edit)
-//					.setIntent(new Intent(Intent.ACTION_EDIT, uri));
-//
-//			menu.add(Menu.CATEGORY_CONTAINER, MENU_ITEM_VIEW, 0,
-//					R.string.menu_course_pick).setShortcut('3', 'p')
-//					.setIcon(android.R.drawable.ic_menu_info_details)
-//					.setIntent(new Intent(Intent.ACTION_VIEW, uri));
-//        }
-//
-//    	return super.onPrepareOptionsMenu(menu);
-//    }
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfo) {
+    	super.onCreateContextMenu(menu, view, menuInfo);
+        AdapterView.AdapterContextMenuInfo info;
+
+        info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+
+        Cursor c = (Cursor) getListAdapter().getItem(info.position);
+
+        // Setup the menu header
+		menu.setHeaderTitle(c.getString(c.getColumnIndex(C.KURS_NAME)));
+
+		// Add a menu item to delete the note
+		Uri uri = ContentUris.withAppendedId(mUri, info.id);
+		menu.add(Menu.NONE, MENU_ITEM_VIEW, 0, R.string.menu_course_view)
+				.setIntent(new Intent(KursTab.ACTION_VIEW_COURSE, uri));
+		menu.add(Menu.NONE, MENU_ITEM_EDIT, 0, R.string.menu_course_edit)
+				.setIntent(new Intent(Intent.ACTION_EDIT, uri));
+		menu.add(Menu.NONE, MENU_ITEM_DELETE, 0, R.string.menu_course_delete);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		super.onContextItemSelected(item);
+
+		AdapterView.AdapterContextMenuInfo info =
+			(AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+		Uri uri = ContentUris.withAppendedId(mUri, info.id);
+
+		switch (item.getItemId()) {
+		case MENU_ITEM_DELETE:
+			AlertDialogs.createDeleteConfirmDialog(this, uri,
+					R.string.dialog_confirm_delete_title,
+					R.string.dialog_confirm_delete_course, true).show();
+			return true;
+		}
+		return false;
+
+	}
 }

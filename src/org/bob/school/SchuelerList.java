@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -24,6 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -40,12 +42,11 @@ public class SchuelerList extends ListActivity {
 	 */
 	public static final String ACTION_VIEW_PUPILS = "org.bob.school.action.VIEW_PUPILS";
 	// Identifiers for our menu items.
-    public static final int MENU_ITEM_SHOW_PUPIL_MISSES = Menu.FIRST + 1;
-    public static final int MENU_ITEM_ADD = Menu.FIRST + 1;
-    public static final int MENU_ITEM_EDIT = Menu.FIRST + 2;
-    public static final int MENU_ITEM_DELETE = Menu.FIRST + 3;
-    public static final int MENU_ITEM_MISSES = Menu.FIRST + 4;
-    public static final int MENU_SORT_LIST = Menu.FIRST + 5;
+	private static final int MENU_ITEM_SHOW_PUPIL_MISSES = Menu.FIRST;
+    private static final int MENU_ITEM_ADD = Menu.FIRST + 1;
+    private static final int MENU_ITEM_EDIT = Menu.FIRST + 2;
+    private static final int MENU_ITEM_DELETE = Menu.FIRST + 3;
+    private static final int MENU_SORT_LIST = Menu.FIRST + 4;
 
     public static final String TAG = "SchuelerList";
 
@@ -196,16 +197,17 @@ public class SchuelerList extends ListActivity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()) {
-		case MENU_ITEM_ADD :
+		switch (item.getItemId()) {
+		case MENU_ITEM_ADD:
 			createAddDialog().show();
 			break;
-		case MENU_ITEM_DELETE :
-			AlertDialogs.createDeleteConfirmDialog(this, mUri, R.string.dialog_confirm_delete_title, 
+		case MENU_ITEM_DELETE:
+			AlertDialogs.createDeleteConfirmDialog(this, mUri,
+					R.string.dialog_confirm_delete_title,
 					R.string.dialog_confirm_delete_course, true).show();
 			break;
-		case MENU_SORT_LIST :
-			mSortOrderCode = (short)(1-mSortOrderCode);
+		case MENU_SORT_LIST:
+			mSortOrderCode = (short) (1 - mSortOrderCode);
 			createPupilList();
 			break;
 		}

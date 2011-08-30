@@ -6,13 +6,13 @@
 	<string name="title_pupil_list">Schülerliste</string>
 	<string name="title_kurs_fehlstunde_edit">Fehlstunden für Kurs eintragen</string>
 	<string name="title_kurs_fehlstunde_list">Fehlstunden für Kurs</string>
+	<string name="title_kurs_edit">Kurseinstellungen bearbeiten</string>
 	<string name="title_fehlstunde_edit">Fehlstunde bearbeiten</string>
+	<string name="title_kurs_insert">Neuen Kurs einfügen</string>
 	
-	<string name="title_kurs_edit">Kurs ändern</string>
-	<string name="resolv_kurs_edit">Kurs bearbeiten</string>
-	<string name="menu_course_insert">Kurs einfügen</string>
+	<string name="menu_course_view">Kurs anzeigen</string>
 	<string name="menu_course_edit">Kurseinstellungen</string>
-	<string name="menu_course_pick">Kurs bearbeiten</string>
+	<string name="menu_course_insert">Kurs einfügen</string>
 	<string name="menu_course_delete">Kurs löschen</string>
 	<string name="menu_pupil_insert">Schüler einfügen</string>
 	<string name="menu_pupil_edit">Namen ändern</string>
@@ -54,5 +54,6 @@
 
 	<string name="toast_pupil_add">Es wurden %1$d Schüler hinzugefügt.</string>
 	<string name="toast_miss_delete">Es wurden %1$d Fehlstundeneinträge gelöscht.</string>
+	<string name="menu_export">Dateiexport</string>
 	
 </resources>
