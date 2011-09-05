@@ -33,7 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class SchuelerList extends ListActivity {
-	public static final String SORT_ORDER_NAME = C.SCHUELER_NACHNAME + "," + C.SCHUELER_VORNAME;
+	public static final String SORT_ORDER_NAME = C.SCHUELER_NACHNAME  + " COLLATE NOCASE," + C.SCHUELER_VORNAME + " COLLATE NOCASE";
 	public static final String SORT_ORDER_MISS = C.MISS_SUM_STUNDEN_Z
 			+ " DESC," + C.MISS_SUM_STUNDEN_E + " ASC" + "," + SORT_ORDER_NAME;
 

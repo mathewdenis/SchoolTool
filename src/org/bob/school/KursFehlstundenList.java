@@ -31,7 +31,7 @@ import android.widget.Toast;
 public class KursFehlstundenList extends Activity implements OnChildClickListener {
 	private static final String DEFAULT_SORT_ORDER_MISSES = C.MISS_DATUM;
 	private static final String DEFAULT_SORT_ORDER_NAME = C.SCHUELER_NACHNAME
-			+ "," + C.SCHUELER_VORNAME;
+			+ " COLLATE NOCASE," + C.SCHUELER_VORNAME + " COLLATE NOCASE";
 
 	private static final int MENU_ITEM_ADD_MISSES = Menu.FIRST;
 	private static final int MENU_ITEM_EDIT_MISS = Menu.FIRST + 1;
