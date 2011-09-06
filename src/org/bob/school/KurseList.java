@@ -21,10 +21,11 @@ import android.widget.SimpleCursorAdapter;
 public class KurseList extends ListActivity {
 	private static final String DEFAULT_SORT_ORDER_KURS = C.KURS_NAME;
     // Identifiers for our menu items.
-    public static final int MENU_ITEM_VIEW = Menu.FIRST;
-    public static final int MENU_ITEM_ADD = Menu.FIRST + 1;
-    public static final int MENU_ITEM_EDIT = Menu.FIRST + 2;
-    public static final int MENU_ITEM_DELETE = Menu.FIRST + 3;
+	private static final int MENU_ITEM_VIEW = Menu.FIRST;
+	private static final int MENU_ITEM_ADD = Menu.FIRST + 1;
+	private static final int MENU_ITEM_ADD_MISSES = Menu.FIRST + 2;
+	private static final int MENU_ITEM_EDIT = Menu.FIRST + 3;
+	private static final int MENU_ITEM_DELETE = Menu.FIRST + 4;
 
     private Uri mUri;  // data: .../course  (COURSE)
     
@@ -91,7 +92,9 @@ public class KurseList extends ListActivity {
 		// Add a menu item to delete the note
 		Uri uri = ContentUris.withAppendedId(mUri, info.id);
 		menu.add(Menu.NONE, MENU_ITEM_VIEW, 0, R.string.menu_course_view)
-				.setIntent(new Intent(KursTab.ACTION_VIEW_COURSE, uri));
+				.setIntent(new Intent(KursTab.ACTION_VIEW_COURSE, uri));		
+		menu.add(Menu.NONE, MENU_ITEM_ADD_MISSES, 0, R.string.menu_misses_insert)
+		.setIntent(new Intent(KursFehlstundenEditor.ACTION_ADD_COURSE_MISSES, uri));		
 		menu.add(Menu.NONE, MENU_ITEM_EDIT, 0, R.string.menu_course_edit)
 				.setIntent(new Intent(Intent.ACTION_EDIT, uri));
 		menu.add(Menu.NONE, MENU_ITEM_DELETE, 0, R.string.menu_course_delete);
