@@ -47,4 +47,25 @@ public class AlertDialogs {
 
 		}, titleId, confirmMessageId);
 	}
+
+	/**  Creates an AlertDialog asking for confirmation for a delete operation
+	 * @param activity The activity to display the dialog in
+	 * @param uri The URI for the delete operation
+	 * @param titleId The id for the string resource of the tile
+	 * @param confirmMessageId The id for the string resource of the confirmation message
+	 * @param notifyUri notify this URI when the item is deleted, can be null
+	 * @return An AlertDialog, readily equipped and armed
+	 */
+	public static AlertDialog createDeleteConfirmDialog(final Activity activity,
+			final Uri uri, int titleId, int confirmMessageId, final Uri notifyUri) {
+		return createDeleteConfirmDialog(activity, new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				activity.getContentResolver().delete(uri, null, null);
+				if (notifyUri != null)
+					activity.getContentResolver().notifyChange(notifyUri, null);
+			}
+
+		}, titleId, confirmMessageId);
+	}
 }

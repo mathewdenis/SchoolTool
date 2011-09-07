@@ -29,7 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class KursFehlstundenList extends Activity implements OnChildClickListener {
-	private static final String DEFAULT_SORT_ORDER_MISSES = C.MISS_DATUM;
+	private static final String DEFAULT_SORT_ORDER_DATE = C.MISS_DATUM;
 	private static final String DEFAULT_SORT_ORDER_NAME = C.SCHUELER_NACHNAME
 			+ " COLLATE NOCASE," + C.SCHUELER_VORNAME + " COLLATE NOCASE";
 
@@ -49,7 +49,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 			TextView tv = (TextView) view;
 			int tv_color = tv.getResources().getColor(
 					android.R.color.primary_text_dark);
-			// in this case, the columns are (_id [0], datum [1], miss_count_sum [2], miss_ex_sum [3])
+			// in this case, the columns are (_id [0], datum [1], miss_count_sum [2], miss_ex_sum [3], miss_ncount_sum [4])
 			if (c.getColumnIndex(C.SCHUELER_NACHNAME) == -1) {
 				tv.setText(CalendarTools.dateFormatter.format(new Date(c.getLong(1))));
 
@@ -127,7 +127,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 						.appendQueryParameter(
 								C.QUERY_DISTINCT_DATES_WITH_ID_HACK,
 								"1").build(), null, null, null,
-				DEFAULT_SORT_ORDER_MISSES);
+				DEFAULT_SORT_ORDER_DATE);
 		c.setNotificationUri(getContentResolver(), mUri);
 
 		// set the expandable list adapter
@@ -251,7 +251,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
         	final Uri modUri = ContentUris.withAppendedId(uri, info.id);
 
 			AlertDialogs.createDeleteConfirmDialog(this, new OnClickListener() {
-				
+
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					getContentResolver().delete(modUri, null, null);
@@ -260,8 +260,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 					// that its content has changed (notice: mUri, not modUri)
 					getContentResolver().notifyChange(mUri, null);
 				}
-			},
-					R.string.dialog_confirm_delete_title,
+			}, R.string.dialog_confirm_delete_title,
 					R.string.dialog_confirm_delete_miss).show();
 			b = true;
         	break;

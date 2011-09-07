@@ -34,7 +34,7 @@ public class KursTab extends TabActivity {
 		intent.addCategory(Intent.CATEGORY_TAB);
 		tabHost.addTab(tabHost.newTabSpec("pupillist")
 				.setIndicator(res.getString(R.string.title_kurs_list),
-						res.getDrawable(R.drawable.menu_kursliste))
+						res.getDrawable(R.drawable.menu_fehlstunden_schuelerliste))
 				.setContent(intent));
 
 		Uri uri = Uri.withAppendedPath(mUri, C.MISS_SEGMENT);

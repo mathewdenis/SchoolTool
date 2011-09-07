@@ -2,10 +2,10 @@
 <resources>
 	<string name="app_name">Fehlstunden</string>
 
-	<string name="title_kurs_list">Kursliste</string>
+	<string name="title_kurs_list">Schüler-Fehlstunden</string>
 	<string name="title_pupil_list">Schülerliste</string>
 	<string name="title_kurs_fehlstunde_edit">Fehlstunden für Kurs eintragen</string>
-	<string name="title_kurs_fehlstunde_list">Fehlstunden für Kurs</string>
+	<string name="title_kurs_fehlstunde_list">Kurs-Fehlstunden</string>
 	<string name="title_kurs_edit">Kurseinstellungen bearbeiten</string>
 	<string name="title_fehlstunde_edit">Fehlstunde bearbeiten</string>
 	<string name="title_kurs_insert">Neuen Kurs einfügen</string>
@@ -19,7 +19,7 @@
 	<string name="menu_pupil_delete">Schüler löschen</string>
 	<string name="menu_misses">Fehlstunden</string>
 	<string name="menu_misses_show">Fehlstunden anzeigen</string>
-	<string name="menu_misses_insert">Fehlstunden eingeben</string>
+	<string name="menu_misses_insert">Fehlstunden hinzufügen</string>
 	<string name="menu_miss_delete">Fehlstunde löschen</string>
 	<string name="menu_miss_delete_all">Alle Fehlstunden löschen</string>
 	<string name="menu_sort_by_size">nach Fehlstunden</string>

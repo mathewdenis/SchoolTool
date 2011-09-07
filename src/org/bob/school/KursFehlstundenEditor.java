@@ -115,7 +115,7 @@ public class KursFehlstundenEditor extends Activity implements
 		Uri uri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);
 		Cursor c = managedQuery(uri, new String[] { C._ID,
 				C.SCHUELER_NACHNAME, C.SCHUELER_VORNAME },
-				null, null, SchuelerList.SORT_ORDER_NAME);
+				null, null, SchuelerFehlstundenList.SORT_ORDER_NAME);
 
 		mPupilsList = (ListView) findViewById(R.id.pupils_list);
 		SimpleCursorAdapter sca = new SimpleCursorAdapter(this,
