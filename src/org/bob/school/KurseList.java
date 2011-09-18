@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 public class KurseList extends ListActivity {
 	private static final String DEFAULT_SORT_ORDER_KURS = C.KURS_NAME;
@@ -28,40 +29,54 @@ public class KurseList extends ListActivity {
 	private static final int MENU_ITEM_DELETE = Menu.FIRST + 4;
 
     private Uri mUri;  // data: .../course  (COURSE)
-    
+    private static class KursListViewBinder implements SimpleCursorAdapter.ViewBinder {
+
+		@Override
+		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+			// column fields: _id[0], kursname[1], count(pupils)[2]
+			((TextView) view).setText(cursor.getString(1) + " ("
+					+ cursor.getInt(2) + ")");
+			return true;
+		}
+
+    }
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mUri = Uri.withAppendedPath(C.CONTENT_URI, C.COURSE_SEGMENT);
+
+        mUri = Uri.withAppendedPath(C.CONTENT_URI, C.COURSE_SEGMENT);
 
 		// if the activity has just been started, set the content uri
 		// of our content provider as data in the intent 
         Intent intent = getIntent();
-        if (intent.getData() == null) {
+        if (intent.getData() == null)
             intent.setData(mUri);
-        }
 
         registerForContextMenu(this.getListView());
-
 		setDefaultKeyMode(DEFAULT_KEYS_SHORTCUT);
 		createCourseList();
 	}
 
 	private void createCourseList() {
-		Cursor c = managedQuery(mUri, new String[] { C._ID,
+		Uri uri = mUri.buildUpon()
+				.appendQueryParameter(C.QUERY_PUPIL_COUNT, "1").build();
+		Cursor c = managedQuery(uri, new String[] { C._ID,
 				C.KURS_NAME }, null, null, DEFAULT_SORT_ORDER_KURS);
+		c.setNotificationUri(getContentResolver(), mUri);
 
-		setListAdapter(new SimpleCursorAdapter(this,
+		SimpleCursorAdapter sca = new SimpleCursorAdapter(this,
 				android.R.layout.simple_list_item_1, c,
 				new String[] { C.KURS_NAME },
-				new int[] { android.R.id.text1 }));
+				new int[] { android.R.id.text1 });
+		sca.setViewBinder(new KursListViewBinder());
+		setListAdapter(sca);
 	}
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-
         Uri uri = ContentUris.withAppendedId(mUri, id);
         startActivity(new Intent(KursTab.ACTION_VIEW_COURSE, uri));	
 	}
@@ -112,7 +127,7 @@ public class KurseList extends ListActivity {
 		case MENU_ITEM_DELETE:
 			AlertDialogs.createDeleteConfirmDialog(this, uri,
 					R.string.dialog_confirm_delete_title,
-					R.string.dialog_confirm_delete_course, true).show();
+					R.string.dialog_confirm_delete_course, mUri).show();
 			return true;
 		}
 		return false;

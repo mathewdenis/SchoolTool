@@ -2,18 +2,30 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
-	<TextView android:textAppearance="?android:attr/textAppearanceMedium"
-		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:id="@+id/date_caption" android:text="@string/date_caption" />
-	<EditText android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:id="@+id/miss_edittext"
-		android:inputType="none" android:clickable="true" android:focusable="false" />
-	<TextView android:textAppearance="?android:attr/textAppearanceMedium"
-		android:layout_width="wrap_content" android:layout_height="wrap_content"
-		android:id="@+id/miss_caption" android:text="@string/miss_caption" />
-	<Spinner android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:entries="@array/stunden_wo_0"
-		android:id="@+id/miss_spinner" />
+	<LinearLayout android:layout_height="wrap_content" android:orientation="horizontal"
+		android:id="@+id/topLayout" android:layout_width="fill_parent">
+		<LinearLayout android:layout_height="wrap_content"
+			android:id="@+id/dateLayout" android:layout_width="fill_parent"
+			android:orientation="vertical" android:layout_weight="1">
+			<TextView android:layout_height="wrap_content"
+				android:layout_width="wrap_content" android:text="@string/date_caption"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:id="@+id/date_caption"></TextView>
+			<EditText android:layout_height="wrap_content" android:id="@+id/miss_edittext"
+				android:layout_width="fill_parent" android:focusable="false"
+				android:clickable="true" android:inputType="none" />
+		</LinearLayout>
+		<LinearLayout android:layout_height="wrap_content" android:layout_weight="1"
+			android:id="@+id/missLayout" android:layout_width="fill_parent"
+			android:orientation="vertical">
+			<TextView android:layout_height="wrap_content"
+				android:layout_width="wrap_content" android:text="@string/miss_caption"
+				android:textAppearance="?android:attr/textAppearanceMedium"
+				android:id="@+id/miss_caption"></TextView>
+			<Spinner android:layout_height="wrap_content" android:id="@+id/miss_spinner"
+				android:entries="@array/stunden_wo_0" android:layout_width="fill_parent"></Spinner>
+		</LinearLayout>
+	</LinearLayout>
 	<ListView android:layout_height="fill_parent"
 		android:layout_weight="1" android:layout_width="fill_parent"
 		android:id="@+id/pupils_list" />

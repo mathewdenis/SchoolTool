@@ -30,7 +30,7 @@ public class SchoolProvider extends ContentProvider {
 
 	private static final int COURSE = 1;
 	private static final int COURSE_ID = 2;
-	private static final int COURSE_PUPIL = 3; //  .../course/#/pupil
+	private static final int COURSE_PUPIL = 3; // .../course/#/pupil
 	private static final int PUPIL_ID = 4;
 	private static final int MISS = 5;
 	private static final int MISS_ID = 6;
@@ -65,54 +65,54 @@ public class SchoolProvider extends ContentProvider {
 			+ " integer not null, " + C.MISS_STUNDEN_Z + " integer not null, "
 			+ C.MISS_STUNDEN_NZ + " integer not null, " + C.MISS_STUNDEN_E
 			+ " integer not null, " + C.MISS_SCHUELERID + " integer not null, "
-			+ C.MISS_GRUND + " integer not null default 0, "
-			+ C.MISS_BEMERKUNG + " text, "
-			+ "foreign key (" + C.MISS_SCHUELERID + ") references "
+			+ C.MISS_GRUND + " integer not null default 0, " + C.MISS_BEMERKUNG
+			+ " text, " + "foreign key (" + C.MISS_SCHUELERID + ") references "
 			+ C.SCHUELER_TABLE + "(" + BaseColumns._ID
-			+ ") ON DELETE CASCADE, "
-			+ "unique (" + C.MISS_DATUM + ", " + C.MISS_SCHUELERID + ", " + C.MISS_GRUND + "))";
+			+ ") ON DELETE CASCADE, " + "unique (" + C.MISS_DATUM + ", "
+			+ C.MISS_SCHUELERID + ", " + C.MISS_GRUND + "))";
 
-	private static final String MISS_VIEW_CREATE = "create view " + C.PUPIL_MISS_VIEW
-			+ " as select " + C.SCHUELER_TABLE + "." + BaseColumns._ID + " AS "
-			+ BaseColumns._ID + "," + "sum(" + C.MISS_STUNDEN_Z + ") AS "
-			+ C.MISS_SUM_STUNDEN_Z + "," + "sum(" + C.MISS_STUNDEN_NZ + ") AS "
-			+ C.MISS_SUM_STUNDEN_NZ + "," + "sum(" + C.MISS_STUNDEN_E + ") AS "
-			+ C.MISS_SUM_STUNDEN_E + " from " + C.SCHUELER_TABLE + " join "
-			+ C.MISS_TABLE + " on (" + C.SCHUELER_TABLE + "." + BaseColumns._ID
-			+ "=" + C.MISS_SCHUELERID + ")" + " group by " + C.SCHUELER_TABLE
-			+ "." + BaseColumns._ID + " order by " + C.MISS_SUM_STUNDEN_Z
-			+ " desc, " + C.MISS_SUM_STUNDEN_E + " desc";
+	private static final String MISS_VIEW_CREATE = "create view "
+			+ C.PUPIL_MISS_VIEW + " as select " + C.SCHUELER_TABLE + "."
+			+ BaseColumns._ID + " AS " + BaseColumns._ID + "," + "sum("
+			+ C.MISS_STUNDEN_Z + ") AS " + C.MISS_SUM_STUNDEN_Z + "," + "sum("
+			+ C.MISS_STUNDEN_NZ + ") AS " + C.MISS_SUM_STUNDEN_NZ + ","
+			+ "sum(" + C.MISS_STUNDEN_E + ") AS " + C.MISS_SUM_STUNDEN_E
+			+ " from " + C.SCHUELER_TABLE + " join " + C.MISS_TABLE + " on ("
+			+ C.SCHUELER_TABLE + "." + BaseColumns._ID + "="
+			+ C.MISS_SCHUELERID + ")" + " group by " + C.SCHUELER_TABLE + "."
+			+ BaseColumns._ID + " order by " + C.MISS_SUM_STUNDEN_Z + " desc, "
+			+ C.MISS_SUM_STUNDEN_E + " desc";
 
 	private SQLiteOpenHelper db_helper;
 	private static final UriMatcher mUriMatcher;
 
-    static {
-    	StringBuilder b = new StringBuilder(C.COURSE_SEGMENT);
-    	mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-    	//  .../course
-    	mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE);
+	static {
+		StringBuilder b = new StringBuilder(C.COURSE_SEGMENT);
+		mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+		// .../course
+		mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE);
 
-    	b.append("/#");
-    	//  .../course/#
-    	mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE_ID);
+		b.append("/#");
+		// .../course/#
+		mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE_ID);
 
-    	StringBuilder b2 = new StringBuilder(C.MISS_SEGMENT);
-    	//  .../miss
-    	mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), MISS);
-    	b2.append("/#");
-    	//  .../miss/#    	
-    	mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), MISS_ID);
-    	b2 = new StringBuilder(b).append("/").append(C.MISS_SEGMENT);
-    	// .../course/#/miss
-    	mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), COURSE_MISS);
+		StringBuilder b2 = new StringBuilder(C.MISS_SEGMENT);
+		// .../miss
+		mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), MISS);
+		b2.append("/#");
+		// .../miss/#
+		mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), MISS_ID);
+		b2 = new StringBuilder(b).append("/").append(C.MISS_SEGMENT);
+		// .../course/#/miss
+		mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), COURSE_MISS);
 
-    	b.append("/").append(C.PUPIL_SEGMENT);
-    	//  .../course/#/pupil
-    	mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE_PUPIL);
-    	b.append("/#");
-    	//  .../course/#/pupil/#
-    	mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), PUPIL_ID);
-    }
+		b.append("/").append(C.PUPIL_SEGMENT);
+		// .../course/#/pupil
+		mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE_PUPIL);
+		b.append("/#");
+		// .../course/#/pupil/#
+		mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), PUPIL_ID);
+	}
 
 	@Override
 	public boolean onCreate() {
@@ -121,19 +121,20 @@ public class SchoolProvider extends ContentProvider {
 			@Override
 			public void onUpgrade(SQLiteDatabase db, int oldVersion,
 					int newVersion) {
-		        Log.i(TAG, "Upgrading DB from version " + oldVersion
-		                + " to " + newVersion);
-				if(oldVersion<2) {
+				Log.i(TAG, "Upgrading DB from version " + oldVersion + " to "
+						+ newVersion);
+				if (oldVersion < 2) {
 					upgrade1(db);
 				}
-//	            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-//	                    + newVersion + ", which will destroy all old data");
-//	            db.execSQL("DROP TABLE IF EXISTS " + C.PUPIL_MISS_VIEW);
-//	            db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);
-//	            db.execSQL("DROP TABLE IF EXISTS " + C.SCHUELER_TABLE);
-//	            db.execSQL("DROP TABLE IF EXISTS " + C.KURS_TABLE);
-//	            onCreate(db);
-//				}
+				// Log.w(TAG, "Upgrading database from version " + oldVersion +
+				// " to "
+				// + newVersion + ", which will destroy all old data");
+				// db.execSQL("DROP TABLE IF EXISTS " + C.PUPIL_MISS_VIEW);
+				// db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);
+				// db.execSQL("DROP TABLE IF EXISTS " + C.SCHUELER_TABLE);
+				// db.execSQL("DROP TABLE IF EXISTS " + C.KURS_TABLE);
+				// onCreate(db);
+				// }
 			}
 
 			private void upgrade1(SQLiteDatabase db) {
@@ -170,7 +171,8 @@ public class SchoolProvider extends ContentProvider {
 		};
 		return true;
 	}
-	
+//	09-18 20:37:37.626: ERROR/AndroidRuntime(2814): Caused by: android.database.sqlite.SQLiteException: ambiguous column name: _id: , while compiling: SELECT kurs._id, name, COUNT(nachname) FROM kurs LEFT JOIN schueler ON kurs._id=kursid GROUP BY _id,name ORDER BY name
+
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
 			String sortOrder) {
@@ -182,6 +184,24 @@ public class SchoolProvider extends ContentProvider {
 		switch (mUriMatcher.match(uri)) {
 		case COURSE: // path is .../course
 			qb.setTables(C.KURS_TABLE);
+			if("1".equals(uri.getQueryParameter(C.QUERY_PUPIL_COUNT))) {
+				String[] myProjection = new String[projection.length+1];
+				projMap.put(C._ID, C.KURS_TABLE + "." + C._ID);
+
+				groupBy = StringTools.arrayToString(projection, projMap, ",", "", "");
+
+				for(int i=0; i<projection.length; ++i)
+					myProjection[i] = projection[i];
+				myProjection[projection.length] = "COUNT(" + C.SCHUELER_NACHNAME + ")";
+				projection = myProjection;
+				fillProjMap(projMap, projection);
+				qb.setProjectionMap(projMap);
+
+					
+				qb.setTables(C.KURS_TABLE + " LEFT JOIN " + C.SCHUELER_TABLE
+						+ " ON " + C.KURS_TABLE + "." + C._ID + "="
+						+ C.SCHUELER_KURSID);
+			}
 			break;
 		case COURSE_ID: // path is .../course/#
 			qb.setTables(C.KURS_TABLE);
@@ -248,25 +268,27 @@ public class SchoolProvider extends ContentProvider {
 		return qb.query(db, projection, selection, selectionArgs, groupBy, null, sortOrder);
 	}
 
-	private void setMissSumsJoin(SQLiteQueryBuilder qb, Uri uri, String[] projection, Map<String, String> projMap) {
-		qb.setTables(C.SCHUELER_TABLE + " LEFT JOIN "
-				+ C.PUPIL_MISS_VIEW + " ON ("
-				+ C.SCHUELER_TABLE + "." + C._ID + "="
+	private void setMissSumsJoin(SQLiteQueryBuilder qb, Uri uri,
+			String[] projection, Map<String, String> projMap) {
+		qb.setTables(C.SCHUELER_TABLE + " LEFT JOIN " + C.PUPIL_MISS_VIEW
+				+ " ON (" + C.SCHUELER_TABLE + "." + C._ID + "="
 				+ C.PUPIL_MISS_VIEW + "." + C._ID + ")");
 
 		// use a projection map for ambiguous column names
 		projMap.put(C._ID, C.SCHUELER_TABLE + "." + C._ID);
-		/* fill the projection map with identity mappings for all columns
-		   used in the projection */
+		/*
+		 * fill the projection map with identity mappings for all columns used
+		 * in the projection
+		 */
 		fillProjMap(projMap, projection);
 		qb.setProjectionMap(projMap);
 	}
 
 	private void fillProjMap(Map<String, String> projMap, String[] projection) {
-		for(String proj : projection)
-			if(!projMap.containsKey(proj))
+		for (String proj : projection)
+			if (!projMap.containsKey(proj))
 				projMap.put(proj, proj);
-		
+
 	}
 
 	@Override
@@ -286,15 +308,17 @@ public class SchoolProvider extends ContentProvider {
 		case COURSE:
 			table = C.KURS_TABLE;
 			if (!values.containsKey(C.KURS_NAME))
-				values.put(C.KURS_NAME, Resources.getSystem()
-						.getString(android.R.string.untitled));
+				values.put(
+						C.KURS_NAME,
+						Resources.getSystem().getString(
+								android.R.string.untitled));
 			if (!values.containsKey(C.KURS_SDATE))
 				values.put(C.KURS_SDATE, now);
 			if (!values.containsKey(C.KURS_EDATE))
-				                             // now + half a year
+				// now + half a year
 				values.put(C.KURS_EDATE, now + 15552000000L);
-			for(String s : C.KURS_WDAYS)
-				if(!values.containsKey(s))
+			for (String s : C.KURS_WDAYS)
+				if (!values.containsKey(s))
 					values.put(s, 0);
 			break;
 		case COURSE_PUPIL:
@@ -319,92 +343,117 @@ public class SchoolProvider extends ContentProvider {
 		}
 
 		long rowId = db.insert(table, null, values);
-        if (rowId > 0) {
-            Uri noteUri = ContentUris.withAppendedId(uri, rowId);
-        	getContext().getContentResolver().notifyChange(uri, null);
-            getContext().getContentResolver().notifyChange(noteUri, null);
-            return noteUri;
-        }
+		if (rowId > 0) {
+			Uri noteUri = ContentUris.withAppendedId(uri, rowId);
+			getContext().getContentResolver().notifyChange(uri, null);
+			getContext().getContentResolver().notifyChange(noteUri, null);
+			return noteUri;
+		}
 		throw new SQLException("Failed to insert row into " + uri);
 	}
 
 	@Override
-	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        SQLiteDatabase db = db_helper.getWritableDatabase();
-        int count;
-        String id = uri.getLastPathSegment();
-        switch (mUriMatcher.match(uri)) {
-        case COURSE_ID:
-            count = db.update(C.KURS_TABLE, values, C._ID + "=" + id
-                    + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
-            break;
-        case PUPIL_ID:
-            count = db.update(C.SCHUELER_TABLE, values, C._ID + "=" + id
-                    + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
-        	break;
-        case MISS_ID:
-            count = db.update(C.MISS_TABLE, values, C._ID + "=" + id
-                    + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
-            break;
-        default:
-            throw new IllegalArgumentException("SchoolProvider.update: Unknown URI " + uri);
-        }
+	public int update(Uri uri, ContentValues values, String selection,
+			String[] selectionArgs) {
+		SQLiteDatabase db = db_helper.getWritableDatabase();
+		int count;
+		String id = uri.getLastPathSegment();
+		switch (mUriMatcher.match(uri)) {
+		case COURSE_ID:
+			count = db.update(C.KURS_TABLE, values, C._ID
+					+ "="
+					+ id
+					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection
+							+ ')' : ""), selectionArgs);
+			break;
+		case PUPIL_ID:
+			count = db.update(C.SCHUELER_TABLE, values, C._ID
+					+ "="
+					+ id
+					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection
+							+ ')' : ""), selectionArgs);
+			break;
+		case MISS_ID:
+			count = db.update(C.MISS_TABLE, values, C._ID
+					+ "="
+					+ id
+					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection
+							+ ')' : ""), selectionArgs);
+			break;
+		default:
+			throw new IllegalArgumentException(
+					"SchoolProvider.update: Unknown URI " + uri);
+		}
 
-        getContext().getContentResolver().notifyChange(uri, null);
-        return count;
-    }
+		getContext().getContentResolver().notifyChange(uri, null);
+		return count;
+	}
 
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
-        SQLiteDatabase db = db_helper.getWritableDatabase();
-        int count;
-        String id = uri.getLastPathSegment();
-        switch (mUriMatcher.match(uri)) {
-        case COURSE_ID:
-            count = db.delete(C.KURS_TABLE, C._ID + "=" + id
-                    + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
-            break;
-        case PUPIL_ID:
-            count = db.delete(C.SCHUELER_TABLE, C._ID + "=" + id
-                    + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
-            break;
-        case MISS_ID:
-            count = db.delete(C.MISS_TABLE, C._ID + "=" + id
-                    + (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
-            break;
-        default:
-            throw new IllegalArgumentException("SchoolProvider.delete: Unknown or unsupported URI " + uri);
-        }
-        getContext().getContentResolver().notifyChange(uri, null);
-        return count;
+		SQLiteDatabase db = db_helper.getWritableDatabase();
+		int count;
+		String id = uri.getLastPathSegment();
+		switch (mUriMatcher.match(uri)) {
+		case COURSE_ID:
+			count = db.delete(C.KURS_TABLE,
+					C._ID
+							+ "="
+							+ id
+							+ (!TextUtils.isEmpty(selection) ? " AND ("
+									+ selection + ')' : ""), selectionArgs);
+			break;
+		case PUPIL_ID:
+			count = db.delete(C.SCHUELER_TABLE,
+					C._ID
+							+ "="
+							+ id
+							+ (!TextUtils.isEmpty(selection) ? " AND ("
+									+ selection + ')' : ""), selectionArgs);
+			break;
+		case MISS_ID:
+			count = db.delete(C.MISS_TABLE,
+					C._ID
+							+ "="
+							+ id
+							+ (!TextUtils.isEmpty(selection) ? " AND ("
+									+ selection + ')' : ""), selectionArgs);
+			break;
+		default:
+			throw new IllegalArgumentException(
+					"SchoolProvider.delete: Unknown or unsupported URI " + uri);
+		}
+		getContext().getContentResolver().notifyChange(uri, null);
+		return count;
 	}
 
 	@Override
 	public String getType(Uri uri) {
-        switch (mUriMatcher.match(uri)) {
-        case COURSE:
-        	return C.CONTENT_COURSES_TYPE;
+		switch (mUriMatcher.match(uri)) {
+		case COURSE:
+			return C.CONTENT_COURSES_TYPE;
 
-        case COURSE_ID:
-        	return C.CONTENT_COURSE_TYPE;
+		case COURSE_ID:
+			return C.CONTENT_COURSE_TYPE;
 
-        case COURSE_PUPIL:
-        	return C.CONTENT_PUPILS_TYPE;
+		case COURSE_PUPIL:
+			return C.CONTENT_PUPILS_TYPE;
 
-        case PUPIL_ID:
-        	return C.CONTENT_PUPIL_TYPE;
+		case PUPIL_ID:
+			return C.CONTENT_PUPIL_TYPE;
 
-        case MISS:
-        	return C.CONTENT_MISSES_TYPE;
+		case MISS:
+			return C.CONTENT_MISSES_TYPE;
 
-        case MISS_ID:
-        	return C.CONTENT_MISS_TYPE;
+		case MISS_ID:
+			return C.CONTENT_MISS_TYPE;
 
-        case COURSE_MISS:
-        	return C.CONTENT_COURSE_MISS_TYPE;
+		case COURSE_MISS:
+			return C.CONTENT_COURSE_MISS_TYPE;
 
-        default:
-            throw new IllegalArgumentException("SchoolProvider.getType: Unknown URI " + uri);
-        }
+		default:
+			throw new IllegalArgumentException(
+					"SchoolProvider.getType: Unknown URI " + uri);
+		}
 	}
 }

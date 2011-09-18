@@ -72,6 +72,12 @@ public class Schule {
 		 */
 		public static final String QUERY_SUM_MISS = "querySumMiss";
 
+		/** Return the number of pupils in a course (for "course"-uris).
+		 * Note that for this to work the _id must be fully qualified
+		 * by the table name (i.e. KURS_TABLE + "." + _ID).
+		 */		
+		public static final String QUERY_PUPIL_COUNT = "queryPupilCount";
+
 //		public static final String _ALT_ID = "_id2";
 
 		public static final String SCHUELER_TABLE = "schueler";
@@ -83,6 +89,7 @@ public class Schule {
 		public static final String KURS_NAME = "name";
 		public static final String KURS_SDATE = "startdatum";
 		public static final String KURS_EDATE = "enddatum";
+		public static final String KURS_SUM_PUPILS = "kurs_sum_pupils";
 		public static final String[] KURS_WDAYS = { "hMon", "hTue", "hWed", "hThu", "hFri" };
 
 		public static final String MISS_TABLE = "versaeumnis";
@@ -98,5 +105,6 @@ public class Schule {
 		public static final String MISS_SUM_STUNDEN_Z = "sum_std_z";
 		public static final String MISS_SUM_STUNDEN_NZ = "sum_std_nz";
 		public static final String MISS_SUM_STUNDEN_E = "sum_std_e";
+
 	}
 }
