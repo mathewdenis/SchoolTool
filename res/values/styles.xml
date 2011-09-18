@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="SchoolTooolTheme" parent="@android:style/Theme.Black">
+		<item name="android:windowBackground">@drawable/global_bg</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
+		<item name="android:listViewStyle">@style/MyListViewStyle</item>
+		<item name="android:expandableListViewStyle">@style/MyExpandableListViewStyle</item>
+	</style>
+    <style name="MyListViewStyle" parent="@android:style/Widget.ListView">
+    	<item name="android:background">#4000</item>
+    </style>
+    <style name="MyExpandableListViewStyle" parent="@android:style/Widget.ExpandableListView">
+    	<item name="android:background">#4000</item>
+    </style>
+</resources>
