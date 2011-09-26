@@ -154,7 +154,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 				android.R.layout.simple_expandable_list_item_2, new String[] {
 						C.SCHUELER_NACHNAME, C.SCHUELER_VORNAME }, new int[] {
 						android.R.id.text1, android.R.id.text2 },
-				android.R.layout.simple_expandable_list_item_1,
+				R.layout.small_expandable_list_item_1,
 				new String[] { C._ID }, new int[] { android.R.id.text1 }) {
 
 			@Override
