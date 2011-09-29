@@ -99,17 +99,9 @@ public class KursFehlstundenEditor extends Activity implements
 		// if there is no lesson today, set "1"
 		mCourseHoursSpinner = (Spinner)findViewById(R.id.miss_spinner);
 		mHoursAdapter = (ArrayAdapter<String>) mCourseHoursSpinner.getAdapter();
-		mDayOfWeek = today.get(Calendar.DAY_OF_WEEK);
-		if (mDayOfWeek >= Calendar.MONDAY && mDayOfWeek <= Calendar.FRIDAY) {
-			int h = mCursor.getInt(mCursor
-					.getColumnIndex(C.KURS_WDAYS[mDayOfWeek - 2]));
 
-			if (h == 0)
-				mCourseHoursSpinner.setSelection(mHoursAdapter.getPosition("1"));
-			else
-				mCourseHoursSpinner.setSelection(mHoursAdapter.getPosition(String
-						.valueOf(h)));
-		}
+		mCourseHoursSpinner.setSelection(mHoursAdapter.getPosition(String
+				.valueOf(Math.max(1, CalendarTools.getTodaysHours(mCursor)))));
 
 		// query
 		Uri uri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);

@@ -39,8 +39,8 @@ public class FehlstundeEditor extends PreferenceActivity implements
 
 	private static final int MENU_ITEM_DELETE = Menu.FIRST;
 
-	// data: .../miss/# (MISS_ID)  (MISS_EDIT)
-	//       .../miss   (MISS)     (MISS_ADD)
+	// data: .../miss/# (MISS_ID)  (ACTION_EDIT)
+	//       .../miss (MISS)  (ACTION_INSERT)
 	private Uri mUri;
 	private Calendar mDatum;
 	private ListPreference mMiss;
@@ -186,8 +186,14 @@ public class FehlstundeEditor extends PreferenceActivity implements
 
 	private void guiUpdatePrefs(Cursor c) {
 		if (c == null) {
-			mMiss.setValue("1");
-			mMiss.setSummary("1");
+			c = getContentResolver()
+					.query((Uri) getIntent().getParcelableExtra(
+							C.CONTENT_COURSE_TYPE), null, null, null, null);
+			c.moveToFirst();
+			String todaysHours = String.valueOf(Math.max(1,
+					CalendarTools.getTodaysHours(c)));
+			mMiss.setValue(todaysHours);
+			mMiss.setSummary(todaysHours);
 			mCount.setChecked(true);
 			mMissExcused.setValue("0");
 			mMissExcused.setSummary("0");

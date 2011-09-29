@@ -56,10 +56,12 @@ public class KursEditor extends PreferenceActivity implements
             // Requested to edit
             mUri = intent.getData();
             mDeleteCourse = false;
+            setTitle(getText(R.string.title_kurs_edit));
         }
         else if (Intent.ACTION_INSERT.equals(action)) {
             // create a new entry in the container.
 			mUri = getContentResolver().insert(intent.getData(), null);
+            setTitle(getText(R.string.title_kurs_insert));
 
 			if (mUri == null) {
 				Log.e(TAG, "Failed to insert new course into "
