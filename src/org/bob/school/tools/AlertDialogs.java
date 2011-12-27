@@ -15,7 +15,7 @@ public class AlertDialogs {
 	 * @param confirmMessageId The id for the string resource of the confirmation message
 	 * @return An AlertDialog, readily equipped and armed
 	 */
-	public static AlertDialog createDeleteConfirmDialog(final Context context, OnClickListener listener, int titleId, int confirmMessageId) {
+	public static AlertDialog createOKCancelDialog(final Context context, OnClickListener listener, int titleId, int confirmMessageId) {
 		return new AlertDialog.Builder(context)
 				.setTitle(titleId)
 				.setMessage(confirmMessageId)
@@ -35,7 +35,7 @@ public class AlertDialogs {
 	 */
 	public static AlertDialog createDeleteConfirmDialog(final Activity activity,
 			final Uri uri, int titleId, int confirmMessageId, final boolean finishActivity) {
-		return createDeleteConfirmDialog(activity, new OnClickListener() {
+		return createOKCancelDialog(activity, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				activity.getContentResolver().delete(uri, null, null);
@@ -58,7 +58,7 @@ public class AlertDialogs {
 	 */
 	public static AlertDialog createDeleteConfirmDialog(final Activity activity,
 			final Uri uri, int titleId, int confirmMessageId, final Uri notifyUri) {
-		return createDeleteConfirmDialog(activity, new OnClickListener() {
+		return createOKCancelDialog(activity, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				activity.getContentResolver().delete(uri, null, null);

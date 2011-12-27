@@ -250,7 +250,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
         case MENU_ITEM_DELETE_MISS :
         	final Uri modUri = ContentUris.withAppendedId(uri, info.id);
 
-			AlertDialogs.createDeleteConfirmDialog(this, new OnClickListener() {
+			AlertDialogs.createOKCancelDialog(this, new OnClickListener() {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
@@ -266,7 +266,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
         	break;
 
 		case MENU_ITEM_DELETE_MISS_ALL:
-			AlertDialogs.createDeleteConfirmDialog(
+			AlertDialogs.createOKCancelDialog(
 					this,
 					new OnClickListener() {
 

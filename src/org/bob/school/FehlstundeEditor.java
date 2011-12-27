@@ -170,7 +170,7 @@ public class FehlstundeEditor extends PreferenceActivity implements
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case MENU_ITEM_DELETE:
-			AlertDialogs.createDeleteConfirmDialog(this, new OnClickListener() {
+			AlertDialogs.createOKCancelDialog(this, new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					getContentResolver().delete(mUri, null, null);
