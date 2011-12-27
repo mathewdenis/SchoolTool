@@ -9,9 +9,11 @@ import org.bob.school.Schule.C;
 import android.database.Cursor;
 
 public class CalendarTools {
-	private static final String dateFormat = "EEE, dd. MMM ''yy";
+	private static final String listViewDateFormat = "EEE, dd. MMM ''yy";
+	private static final String filenameDateFormat = "yyyyMMdd_hhmm";
 
-	public static final DateFormat dateFormatter = new SimpleDateFormat(dateFormat);
+	public static final DateFormat LISTVIEW_DATE_FORMATER = new SimpleDateFormat(listViewDateFormat);
+	public static final DateFormat FILENAME_DATE_FORMATER = new SimpleDateFormat(filenameDateFormat);
 
 	/**  Reset the time to 0:00.0 (i.e. 12:00.0 AM), date stays unchanged
 	 * @param c calendar to reset

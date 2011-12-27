@@ -1,9 +1,11 @@
 package org.bob.school;
 
+import java.io.File;
 import java.util.Date;
 import java.util.regex.Pattern;
 
 import org.bob.school.Schule.C;
+import org.bob.school.export.ExportToFile;
 import org.bob.school.tools.AlertDialogs;
 import org.bob.school.tools.CalendarTools;
 import org.bob.school.tools.SchoolTools;
@@ -26,6 +28,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CursorTreeAdapter;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.SimpleCursorTreeAdapter;
@@ -73,7 +76,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 			// case: child list item
 			// columns are: _id[0], datum[1], miss_count[2], miss_ex[3], miss_ncount[4]
 			if (c.getColumnIndex(C.SCHUELER_NACHNAME) == -1) {
-				StringBuilder sb = new StringBuilder(CalendarTools.dateFormatter.format(new Date(c.getLong(1))));
+				StringBuilder sb = new StringBuilder(CalendarTools.LISTVIEW_DATE_FORMATER.format(new Date(c.getLong(1))));
 				sb.append(" (")
 						.append(StringTools.writeZeroIfNull(c.getString(2)))
 						.append("/")
@@ -118,12 +121,11 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 		mWorkingUri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);
 
 		// get course name
-		Cursor c = getContentResolver().query(mUri,
-				new String[] { C.KURS_NAME }, null, null, null);
-
-		c.moveToFirst();
-		setTitle(getTitle() + ": " + c.getString(c.getColumnIndex(C.KURS_NAME)));
-		c.close();
+		// Cursor c = getContentResolver().query(mUri,
+		// new String[] { C.KURS_NAME }, null, null, null);
+		// c.moveToFirst();
+		// mTitle = c.getString(c.getColumnIndex(C.KURS_NAME));
+		// c.close();
 
 		registerForContextMenu(getExpandableListView());
 
@@ -229,7 +231,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 				.setShortcut('3', 'd').setIcon(android.R.drawable.ic_menu_delete);
 		menu.add(Menu.NONE, MENU_SORT_LIST, 0, R.string.menu_sort_by_size)
 				.setShortcut('4', 's');
-//		menu.add(Menu.NONE, MENU_ITEM_EXPORT, 0, R.string.menu_export);
+		menu.add(Menu.NONE, MENU_ITEM_EXPORT, 0, R.string.menu_export);
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -268,36 +270,28 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 			mSortOrderCode = (short) (1 - mSortOrderCode);
 			createPupilList();
 			break;
-//		case MENU_ITEM_EXPORT:
-//			StringBuilder b = new StringBuilder();
-//			b.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\" /></head><body>")
-//			 .append("<table><tr><th>Name</th><th>Fehlstunden</th><th>unentschuldigt</th></tr>");
-//			Cursor c = ((CursorAdapter)getListAdapter()).getCursor();
-//			c.moveToFirst();
-//			while(!c.isAfterLast()) {
-//				b.append("<tr><td>").append(c.getString(1)).append(", ")
-//				.append(c.getString(2)).append("</td><td>")
-//				.append(StringTools.writeZeroIfNull(c.getString(3))).append("</td><td>")
-//				.append(StringTools.writeZeroIfNull(c.getString(4))).append("</td></tr>");
-//				c.moveToNext();
-//			}
-//			b.append("</table></body>");
-//			try {
-//				FileOutputStream f = openFileOutput("bla.html", Context.MODE_WORLD_READABLE);
-//				f.write(b.toString().getBytes());
-//				f.close();
-//
-//				Intent i = new Intent(Intent.ACTION_VIEW);
-//				
-//				i.setDataAndType(
-//						Uri.fromFile(new File(getFilesDir(), "bla.html")),
-//						"text/html");
-//				startActivity(i);
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//				Log.e("SchuelerList", "Trying to write to " + getCacheDir() + ": " + e.getMessage());
-//			}
-//			break;
+		case MENU_ITEM_EXPORT:
+			StringBuilder b = new StringBuilder();
+			b.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\" /></head><body>")
+			 .append("<table><tr><th>Name</th><th>Fehlstunden</th><th>unentschuldigt</th></tr>");
+			Cursor c = ((CursorTreeAdapter)getExpandableListAdapter()).getCursor();
+			c.moveToFirst();
+			while(!c.isAfterLast()) {
+				b.append("<tr><td>").append(c.getString(1)).append(", ")
+				.append(c.getString(2)).append("</td><td>")
+				.append(StringTools.writeZeroIfNull(c.getString(3))).append("</td><td>")
+				.append(StringTools.writeZeroIfNull(c.getString(4))).append("</td></tr>");
+				c.moveToNext();
+			}
+			b.append("</table></body></html>");
+			File filename = new ExportToFile("kurs_fehlstunden_"
+					+ mUri.getLastPathSegment() + "_").exportFile(b);
+			Toast.makeText(
+					SchuelerFehlstundenList.this,
+					getResources().getString(R.string.export_as_file,
+							filename.getAbsoluteFile()), Toast.LENGTH_SHORT)
+					.show();
+			break;
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -318,7 +312,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
         	Cursor c = (Cursor) getExpandableListAdapter().getChild(pgroup, pchild);
 
     		// columns are: _id[0], datum[1], miss_count[2], miss_ex[3], miss_ncount[4]
-			menuHeader = CalendarTools.dateFormatter.format(new Date(c
+			menuHeader = CalendarTools.LISTVIEW_DATE_FORMATER.format(new Date(c
 					.getLong(1)));        	
 			menu.add(Menu.NONE, MENU_ITEM_EDIT_MISS, 0,
 					R.string.title_fehlstunde_edit).setIntent(

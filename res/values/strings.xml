@@ -8,6 +8,7 @@
 	<string name="title_kurs_fehlstunde_list">Kurs-Fehlstunden</string>
 	<string name="title_kurs_edit">Kurseinstellungen bearbeiten</string>
 	<string name="title_fehlstunde_edit">Fehlstunde bearbeiten</string>
+	<string name="title_fehlstunde_overwrite">Fehlstunde überschreiben?</string>
 	<string name="title_kurs_insert">Neuen Kurs einfügen</string>
 	
 	<string name="menu_course_view">Kurs anzeigen</string>
@@ -51,9 +52,10 @@
 	<string name="dialog_confirm_delete_miss_all">Sollen alle Fehlstunden des Kurses zu diesem Datum gelöscht werden?</string>
 	<string name="dialog_pupil_add_format">Format: Name1, Vorname1; Name2, Vorname2; ...</string>
 	<string name="dialog_pupil_edit">Format: Name, Vorname</string>
-
+	<string name="dialog_update_miss">Fehlstunde existiert bereits, soll sie durch die eingegegebene überschrieben werden?</string>
 	<string name="toast_pupil_add">Es wurden %1$d Schüler hinzugefügt.</string>
 	<string name="toast_miss_delete">Es wurden %1$d Fehlstundeneinträge gelöscht.</string>
 	<string name="menu_export">Dateiexport</string>
-	
+
+	<string name="export_as_file">Datei %1$s wurde erstellt.</string>
 </resources>
