@@ -360,38 +360,50 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		StringBuilder exportBuild = new StringBuilder();
 		Date d;
 		int dow;
+		int dmh;
 		Calendar cal = Calendar.getInstance();
-		while(!c.isAfterLast()) {
+		while(!c.isAfterLast()) {   // loop over days
+			dmh = 1;
 			d = new Date(c.getLong(1));
 			cal.setTime(d);
 			exportBuild.append("<div><p><strong>")
 					.append(CalendarTools.LISTVIEW_DATE_FORMATER.format(d));
 			dow = cal.get(Calendar.DAY_OF_WEEK);
 			if (dow >= Calendar.MONDAY && dow <= Calendar.FRIDAY)
-				exportBuild.append(" (")
-						.append(Math.max(1, mWeekHours[dow - 2])).append(")");
+				dmh = Math.max(1, mWeekHours[dow - 2]);
+			exportBuild.append(" (").append(dmh).append(")");
 
-			exportBuild.append(")</strong></p><p>");
+			exportBuild.append("</strong></p><p>");
 			cc = cta.getChildrenCursor(c);
 			cc.moveToFirst();
-			while(!cc.isAfterLast()) {
+			while(!cc.isAfterLast()) {  // loop over missing pupils
 				exportBuild.append("<span class=\"");
 				if(cc.getInt(4)==0 && cc.getInt(3)>0)
 					exportBuild.append("u");
 				exportBuild.append("e\">");
 				exportBuild.append(cc.getString(1)).append(", ").append(cc.getString(2));
-				if(cc.getInt(3)>0) {
-					exportBuild.append(" (").append(cc.getString(3)).append("h");
-					if(cc.getInt(4)==cc.getInt(3))
-						exportBuild.append(",e");
-					else if(cc.getInt(4)>0)
-						exportBuild.append(",").append(cc.getInt(4)).append("h e");
-					else
-						exportBuild.append(",ue");
-					exportBuild.append(")");
-				} else if(cc.getInt(5)>0)
-					exportBuild.append(" (").append(cc.getString(5)).append("h,SV)");
-				exportBuild.append("</span>");
+				exportBuild.append(" (");
+
+				if (cc.getInt(5) > 0) {
+					if(cc.getInt(5) != dmh)
+						exportBuild.append(cc.getString(5)).append("h ");
+					exportBuild.append("SV");
+				}
+				else {
+					if (cc.getInt(3) != dmh)
+						exportBuild.append(cc.getString(3)).append("h ");
+					if (cc.getInt(4) == cc.getInt(3))
+						exportBuild.append("e");
+					else {
+						if (cc.getInt(4) > 0) {
+							if (cc.getInt(3) != dmh)
+								exportBuild.append(",");
+							exportBuild.append(cc.getInt(4)).append("h e");
+						}
+						else exportBuild.append("ue");
+					}
+				}
+				exportBuild.append(")</span>");
 				cc.moveToNext();
 				if(!cc.isAfterLast())
 					exportBuild.append("; ");
