@@ -1,6 +1,5 @@
 package org.bob.school;
 
-import java.io.File;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -271,26 +270,17 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 			createPupilList();
 			break;
 		case MENU_ITEM_EXPORT:
-			StringBuilder b = new StringBuilder();
-			b.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\" /></head><body>")
-			 .append("<table><tr><th>Name</th><th>Fehlstunden</th><th>unentschuldigt</th></tr>");
-			Cursor c = ((CursorTreeAdapter)getExpandableListAdapter()).getCursor();
-			c.moveToFirst();
-			while(!c.isAfterLast()) {
-				b.append("<tr><td>").append(c.getString(1)).append(", ")
-				.append(c.getString(2)).append("</td><td>")
-				.append(StringTools.writeZeroIfNull(c.getString(3))).append("</td><td>")
-				.append(StringTools.writeZeroIfNull(c.getString(4))).append("</td></tr>");
-				c.moveToNext();
-			}
-			b.append("</table></body></html>");
-			File filename = new ExportToFile("kurs_fehlstunden_"
-					+ mUri.getLastPathSegment() + "_").exportFile(b);
 			Toast.makeText(
 					SchuelerFehlstundenList.this,
-					getResources().getString(R.string.export_as_file,
-							filename.getAbsoluteFile()), Toast.LENGTH_SHORT)
-					.show();
+					getResources().getString(
+							R.string.export_as_file,
+							new ExportToFile("kurs_fehlstunden_"
+									+ mUri.getLastPathSegment() + "_")
+									.append(this, R.string.exportheader)
+									.append(generateHtml())
+									.append(this, R.string.exportfooter)
+									.exportFile().getAbsoluteFile()),
+					Toast.LENGTH_SHORT).show();
 			break;
 		}
 
@@ -439,5 +429,21 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 				}).setNegativeButton(android.R.string.cancel, null)
 				.setIcon(android.R.drawable.ic_media_ff).setView(et)
 				.create();
+	}
+
+	private StringBuilder generateHtml() {
+		StringBuilder b = new StringBuilder();
+		b.append("<table><tr><th>Name</th><th>Fehlstunden</th><th>unentschuldigt</th></tr>");
+		Cursor c = ((CursorTreeAdapter)getExpandableListAdapter()).getCursor();
+		c.moveToFirst();
+		while(!c.isAfterLast()) {
+			b.append("<tr><td>").append(c.getString(1)).append(", ")
+			.append(c.getString(2)).append("</td><td>")
+			.append(StringTools.writeZeroIfNull(c.getString(3))).append("</td><td>")
+			.append(StringTools.writeZeroIfNull(c.getString(4))).append("</td></tr>\n");
+			c.moveToNext();
+		}
+		b.append("</table>");
+		return b;
 	}
 }

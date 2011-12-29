@@ -1,6 +1,6 @@
 package org.bob.school;
 
-import java.io.File;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.bob.school.Schule.C;
@@ -42,6 +42,9 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 	private static final int MENU_ITEM_EXPORT = Menu.FIRST + 4;
 
 	private Uri mUri; // .../course/#/miss (COURSE_MISS)
+	private String mCourseId;
+	private String mCourseName;
+	private int[] mWeekHours = new int[5];
 	private ExpandableListView mExpListView;
 
 	private static class MySimpleCursorTreeAdapter extends SimpleCursorTreeAdapter {
@@ -139,12 +142,15 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		// append course name to activity title
 		Uri uri = Uri.withAppendedPath(C.CONTENT_URI,
 				C.COURSE_SEGMENT);
-		uri = Uri.withAppendedPath(uri, mUri.getPathSegments().get(1));
-		c = getContentResolver().query(uri,
-				new String[] { C.KURS_NAME }, null, null, null);
+		mCourseId = mUri.getPathSegments().get(1);
+		uri = Uri.withAppendedPath(uri, mCourseId);
+		c = getContentResolver().query(uri, null, null, null, null);
 		c.moveToFirst();
-		setTitle(getTitle() + ": "
-				+ c.getString(c.getColumnIndex(C.KURS_NAME)));
+		mCourseName = c.getString(c.getColumnIndex(C.KURS_NAME));
+
+		for (int i = 0; i < 5; ++i)
+			mWeekHours[i] = c.getInt(c.getColumnIndex(C.KURS_WDAYS[i]));
+
 		c.close();
 
 		registerForContextMenu(mExpListView);
@@ -169,6 +175,13 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 						android.R.id.text1, android.R.id.text2 });
 		cta.setViewBinder(new DateBinder());
 		mExpListView.setAdapter(cta);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		// set title of parent tab activity 
+		getParent().setTitle(getTitle() + ": " + mCourseName);		
 	}
 
 	@Override
@@ -218,56 +231,20 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		return super.onCreateOptionsMenu(menu);
 	}
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item){
 		switch (item.getItemId()) {
 		case MENU_ITEM_EXPORT:
-			MySimpleCursorTreeAdapter cta = ((MySimpleCursorTreeAdapter)mExpListView.getExpandableListAdapter());
-			Cursor c = cta.getCursor();
-			c.moveToFirst();
-
-			StringBuilder b = new StringBuilder();
-			b.append("<html><head><meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\" /></head><body>");
-			while(!c.isAfterLast()) {
-				b.append("<div><p><strong>")
-						.append(CalendarTools.LISTVIEW_DATE_FORMATER
-								.format(new Date(c.getLong(1))))
-						.append("</strong></p><p>");
-				Cursor cc = cta.getChildrenCursor(c);
-				cc.moveToFirst();
-				while(!cc.isAfterLast()) {
-					b.append("<span style=\"");
-					if(cc.getInt(4)==0 && cc.getInt(3)>0) {
-						b.append("color:red;");
-					}
-					b.append("\">");
-					b.append(cc.getString(1)).append(", ").append(cc.getString(2));
-					if(cc.getInt(3)>0) {
-						b.append(" (").append(cc.getString(3)).append("h");
-						if(cc.getInt(4)==cc.getInt(3))
-							b.append(",e");
-						else if(cc.getInt(4)>0)
-							b.append(",").append(cc.getInt(4)).append("h e");
-						else
-							b.append(",ue");
-						b.append(")");
-					} else if(cc.getInt(5)>0)
-						b.append(" (").append(cc.getString(5)).append("h,SV)");
-					b.append("</span>");
-					cc.moveToNext();
-					if(!cc.isAfterLast())
-						b.append("; ");
-				}
-				b.append("</p></div>");
-				c.moveToNext();
-			}
-			b.append("</body></html>");
-			File filename = 
-			new ExportToFile("tage_fehlstunden_" + mUri.getPathSegments().get(1) + "_").exportFile(b);
 			Toast.makeText(
 					KursFehlstundenList.this,
-					getResources().getString(R.string.export_as_file,
-							filename.getAbsoluteFile()), Toast.LENGTH_SHORT)
-					.show();
+					getResources().getString(
+							R.string.export_as_file,
+							new ExportToFile("tage_fehlstunden_"
+									+ mUri.getPathSegments().get(1) + "_")
+									.append(this, R.string.exportheader)
+									.append(generateHtml())
+									.append(this, R.string.exportfooter)
+									.exportFile().getAbsoluteFile()),
+					Toast.LENGTH_SHORT).show();
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -373,5 +350,56 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		}
 
         return b;
-	}	
+	}
+
+	private StringBuilder generateHtml() {
+		MySimpleCursorTreeAdapter cta = ((MySimpleCursorTreeAdapter)mExpListView.getExpandableListAdapter());
+		Cursor c = cta.getCursor();
+		Cursor cc;
+		c.moveToFirst();
+		StringBuilder exportBuild = new StringBuilder();
+		Date d;
+		int dow;
+		Calendar cal = Calendar.getInstance();
+		while(!c.isAfterLast()) {
+			d = new Date(c.getLong(1));
+			cal.setTime(d);
+			exportBuild.append("<div><p><strong>")
+					.append(CalendarTools.LISTVIEW_DATE_FORMATER.format(d));
+			dow = cal.get(Calendar.DAY_OF_WEEK);
+			if (dow >= Calendar.MONDAY && dow <= Calendar.FRIDAY)
+				exportBuild.append(" (")
+						.append(Math.max(1, mWeekHours[dow - 2])).append(")");
+
+			exportBuild.append(")</strong></p><p>");
+			cc = cta.getChildrenCursor(c);
+			cc.moveToFirst();
+			while(!cc.isAfterLast()) {
+				exportBuild.append("<span class=\"");
+				if(cc.getInt(4)==0 && cc.getInt(3)>0)
+					exportBuild.append("u");
+				exportBuild.append("e\">");
+				exportBuild.append(cc.getString(1)).append(", ").append(cc.getString(2));
+				if(cc.getInt(3)>0) {
+					exportBuild.append(" (").append(cc.getString(3)).append("h");
+					if(cc.getInt(4)==cc.getInt(3))
+						exportBuild.append(",e");
+					else if(cc.getInt(4)>0)
+						exportBuild.append(",").append(cc.getInt(4)).append("h e");
+					else
+						exportBuild.append(",ue");
+					exportBuild.append(")");
+				} else if(cc.getInt(5)>0)
+					exportBuild.append(" (").append(cc.getString(5)).append("h,SV)");
+				exportBuild.append("</span>");
+				cc.moveToNext();
+				if(!cc.isAfterLast())
+					exportBuild.append("; ");
+			}
+			cc.close();
+			exportBuild.append("</p>\n</div>\n");
+			c.moveToNext();
+		}
+		return exportBuild;
+	}
 }

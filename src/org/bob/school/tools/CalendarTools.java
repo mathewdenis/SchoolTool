@@ -36,8 +36,7 @@ public class CalendarTools {
 		int dOfW = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
 		if (dOfW >= Calendar.MONDAY && dOfW <= Calendar.FRIDAY) {
 			int index = c.getColumnIndexOrThrow(C.KURS_WDAYS[dOfW - 2]);
-			int h = c.getInt(index); 
-			return h;
+			return c.getInt(index);
 		}
 		else
 			// no school on Saturdays or Sundays
