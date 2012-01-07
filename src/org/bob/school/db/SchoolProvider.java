@@ -292,9 +292,9 @@ public class SchoolProvider extends ContentProvider {
 	}
 
 	@Override
-	public Uri insert(Uri uri, ContentValues contentValues) {
+	public Uri insert(Uri uri, ContentValues contentValues) throws SQLException {
 		SQLiteDatabase db = db_helper.getWritableDatabase();
-		String table = null;
+		String tableName = null;
 		ContentValues values;
 
 		if (contentValues != null)
@@ -306,7 +306,7 @@ public class SchoolProvider extends ContentProvider {
 
 		switch (mUriMatcher.match(uri)) {
 		case COURSE:
-			table = C.KURS_TABLE;
+			tableName = C.KURS_TABLE;
 			if (!values.containsKey(C.KURS_NAME))
 				values.put(
 						C.KURS_NAME,
@@ -322,7 +322,7 @@ public class SchoolProvider extends ContentProvider {
 					values.put(s, 0);
 			break;
 		case COURSE_PUPIL:
-			table = C.SCHUELER_TABLE;
+			tableName = C.SCHUELER_TABLE;
 			if (!values.containsKey(C.SCHUELER_NACHNAME)
 					|| !values.containsKey(C.SCHUELER_VORNAME))
 				throw new SQLException("Failed to insert pupil row into " + uri
@@ -331,7 +331,7 @@ public class SchoolProvider extends ContentProvider {
 				values.put(C.SCHUELER_KURSID, uri.getPathSegments().get(1));
 			break;
 		case MISS:
-			table = C.MISS_TABLE;
+			tableName = C.MISS_TABLE;
 			if (!values.containsKey(C.MISS_DATUM)
 					|| !values.containsKey(C.MISS_STUNDEN_Z)
 					|| !values.containsKey(C.MISS_STUNDEN_NZ)
@@ -340,9 +340,22 @@ public class SchoolProvider extends ContentProvider {
 				throw new SQLException("Failed to insert miss row into " + uri
 						+ ". Missing non-null information.");
 			break;
+		case COURSE_ID:
+			tableName = C.KURS_TABLE;
+			values.put(C._ID, uri.getLastPathSegment());
+			break;
+		case PUPIL_ID:
+			tableName = C.SCHUELER_TABLE;
+			values.put(C._ID, uri.getLastPathSegment());
+			break;
+		case MISS_ID:
+			tableName = C.MISS_TABLE;
+			values.put(C._ID, uri.getLastPathSegment());
+			break;
 		}
 
-		long rowId = db.insert(table, null, values);
+		long rowId = db.insert(tableName, null, values);
+
 		if (rowId > 0) {
 			Uri noteUri = ContentUris.withAppendedId(uri, rowId);
 			getContext().getContentResolver().notifyChange(uri, null);
@@ -353,38 +366,77 @@ public class SchoolProvider extends ContentProvider {
 	}
 
 	@Override
-	public int update(Uri uri, ContentValues values, String selection,
-			String[] selectionArgs) {
+	public int bulkInsert(Uri uri, ContentValues[] values) throws SQLException {
 		SQLiteDatabase db = db_helper.getWritableDatabase();
+		SQLiteStatement insert;
+		db.beginTransaction();
+		int numInserts = 0;
+		try {
+			switch (mUriMatcher.match(uri)) {
+			case MISS:
+				insert = db.compileStatement("INSERT INTO " + C.MISS_TABLE
+						+ " (" + C.MISS_DATUM + "," + C.MISS_STUNDEN_Z + ","
+						+ C.MISS_STUNDEN_NZ + "," + C.MISS_STUNDEN_E + ","
+						+ C.MISS_SCHUELERID + ") VALUES (?,?,?,?,?)");
+				for (ContentValues v : values) {
+					insert.bindLong(1, v.getAsLong(C.MISS_DATUM));
+					insert.bindLong(2, v.getAsInteger(C.MISS_STUNDEN_Z));
+					insert.bindLong(3, v.getAsInteger(C.MISS_STUNDEN_NZ));
+					insert.bindLong(4, v.getAsInteger(C.MISS_STUNDEN_E));
+					insert.bindLong(5, v.getAsLong(C.MISS_SCHUELERID));
+					numInserts += insert.executeInsert();
+				}
+				break;
+			case COURSE_PUPIL:
+				insert = db.compileStatement("INSERT INTO " + C.SCHUELER_TABLE
+						+ "(" + C.SCHUELER_NACHNAME + "," + C.SCHUELER_VORNAME
+						+ ") VALUES (?,?)");
+				for (ContentValues v : values) {
+					insert.bindString(1, v.getAsString(C.SCHUELER_NACHNAME));
+					insert.bindString(2, v.getAsString(C.SCHUELER_VORNAME));
+					numInserts += insert.executeInsert();
+				}
+				break;
+			default:
+				throw new UnsupportedOperationException("Unsupported uri: "
+						+ uri);
+			}
+			db.setTransactionSuccessful();
+		} catch (SQLiteConstraintException ce) {
+			Toast.makeText(
+					this.getContext(),
+					getContext().getResources().getString(
+							R.string.toast_bulk_insert_constraint_violation),
+					Toast.LENGTH_LONG).show();
+		} finally {
+			db.endTransaction();
+		}
+		return numInserts;
+	}
+
+	@Override
+	public int update(Uri uri, ContentValues values, String selection,
+			String[] selectionArgs) throws SQLException {
+		SQLiteDatabase db = db_helper.getWritableDatabase();
+		String tableName;
 		int count;
 		String id = uri.getLastPathSegment();
 		switch (mUriMatcher.match(uri)) {
 		case COURSE_ID:
-			count = db.update(C.KURS_TABLE, values, C._ID
-					+ "="
-					+ id
-					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection
-							+ ')' : ""), selectionArgs);
+			tableName = C.KURS_TABLE;
 			break;
 		case PUPIL_ID:
-			count = db.update(C.SCHUELER_TABLE, values, C._ID
-					+ "="
-					+ id
-					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection
-							+ ')' : ""), selectionArgs);
+			tableName = C.SCHUELER_TABLE;
 			break;
 		case MISS_ID:
-			count = db.update(C.MISS_TABLE, values, C._ID
-					+ "="
-					+ id
-					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection
-							+ ')' : ""), selectionArgs);
+			tableName = C.MISS_TABLE;
 			break;
 		default:
 			throw new IllegalArgumentException(
 					"SchoolProvider.update: Unknown URI " + uri);
 		}
-
+		count = db.update(tableName, values, C._ID + "=" + id
+					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
 		getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
@@ -393,36 +445,24 @@ public class SchoolProvider extends ContentProvider {
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		SQLiteDatabase db = db_helper.getWritableDatabase();
 		int count;
+		String tableName;
 		String id = uri.getLastPathSegment();
 		switch (mUriMatcher.match(uri)) {
 		case COURSE_ID:
-			count = db.delete(C.KURS_TABLE,
-					C._ID
-							+ "="
-							+ id
-							+ (!TextUtils.isEmpty(selection) ? " AND ("
-									+ selection + ')' : ""), selectionArgs);
+			tableName = C.KURS_TABLE;
 			break;
 		case PUPIL_ID:
-			count = db.delete(C.SCHUELER_TABLE,
-					C._ID
-							+ "="
-							+ id
-							+ (!TextUtils.isEmpty(selection) ? " AND ("
-									+ selection + ')' : ""), selectionArgs);
+			tableName = C.SCHUELER_TABLE;
 			break;
 		case MISS_ID:
-			count = db.delete(C.MISS_TABLE,
-					C._ID
-							+ "="
-							+ id
-							+ (!TextUtils.isEmpty(selection) ? " AND ("
-									+ selection + ')' : ""), selectionArgs);
+			tableName = C.MISS_TABLE;
 			break;
 		default:
 			throw new IllegalArgumentException(
 					"SchoolProvider.delete: Unknown or unsupported URI " + uri);
 		}
+		count = db.delete(tableName, C._ID + "=" + id
+					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
 		getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}

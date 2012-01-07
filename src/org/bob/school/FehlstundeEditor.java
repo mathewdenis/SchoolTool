@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -27,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.Toast;
 
 public class FehlstundeEditor extends PreferenceActivity implements
 		OnDateSetListener, OnPreferenceChangeListener,
@@ -140,13 +142,22 @@ public class FehlstundeEditor extends PreferenceActivity implements
 		values.put(SchoolTools.buildMissColumn(!mCount.isChecked()), 0);
 		values.put(C.MISS_STUNDEN_E, mMissExcused.getValue());
 
-		if(Intent.ACTION_INSERT.equals(getIntent().getAction())) {
-			values.put(C.MISS_SCHUELERID, mUri.getQueryParameter(C.MISS_SCHUELERID));
-			Uri uri = getContentResolver().insert(mUri, values);
-			getIntent().setData(uri);
-			setResult(RESULT_OK, getIntent());
-		} else
-			getContentResolver().update(mUri, values, null, null);
+		try {
+			if (Intent.ACTION_INSERT.equals(getIntent().getAction())) {
+				values.put(C.MISS_SCHUELERID,
+						mUri.getQueryParameter(C.MISS_SCHUELERID));
+				Uri uri = getContentResolver().insert(mUri, values);
+				getIntent().setData(uri);
+				setResult(RESULT_OK, getIntent());
+			} else
+				getContentResolver().update(mUri, values, null, null);
+		} catch (SQLiteConstraintException ce) {
+			Toast.makeText(
+					this,
+					getResources().getString(
+							R.string.toast_update_miss_constraint_violation),
+					Toast.LENGTH_LONG).show();
+		}
 
 		setResult(RESULT_OK);
 		finish();
