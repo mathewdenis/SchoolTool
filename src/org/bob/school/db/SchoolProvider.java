@@ -3,6 +3,7 @@ package org.bob.school.db;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bob.school.R;
 import org.bob.school.Schule;
 import org.bob.school.Schule.C;
 import org.bob.school.tools.StringTools;
@@ -16,16 +17,19 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
+import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 public class SchoolProvider extends ContentProvider {
 	public static final String DATABASE_NAME = "schooltool.db";
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 3;
 	public static final String TAG = "SchoolProvider";
 
 	private static final int COURSE = 1;
@@ -35,6 +39,7 @@ public class SchoolProvider extends ContentProvider {
 	private static final int MISS = 5;
 	private static final int MISS_ID = 6;
 	private static final int COURSE_MISS = 7;
+	private static final int SETTINGS = 8;
 
 	// Table and View create statements
 	private static final String SCHUELER_TABLE_CREATE = "create table "
@@ -79,16 +84,32 @@ public class SchoolProvider extends ContentProvider {
 			+ "sum(" + C.MISS_STUNDEN_E + ") AS " + C.MISS_SUM_STUNDEN_E
 			+ " from " + C.SCHUELER_TABLE + " join " + C.MISS_TABLE + " on ("
 			+ C.SCHUELER_TABLE + "." + BaseColumns._ID + "="
-			+ C.MISS_SCHUELERID + ")" + " group by " + C.SCHUELER_TABLE + "."
-			+ BaseColumns._ID + " order by " + C.MISS_SUM_STUNDEN_Z + " desc, "
-			+ C.MISS_SUM_STUNDEN_E + " desc";
+			+ C.MISS_SCHUELERID + ")" + " where " + C.MISS_DATUM
+			+ " between (select " + C.SETTINGS_VALUE_INT + " from "
+			+ C.SETTINGS_TABLE + " where " + C.SETTINGS_NAME + "='"
+			+ C.STARTDATE_SUM_MISS_SETTING + "') and "
+			+ "coalesce((select " + C.SETTINGS_VALUE_INT + " from "
+			+ C.SETTINGS_TABLE + " where " + C.SETTINGS_NAME + "='"
+			+ C.ENDDATE_SUM_MISS_SETTING + "'), (select max(" + C.MISS_DATUM
+			+ ") from " + C.MISS_TABLE + "))" + " group by " + C.SCHUELER_TABLE
+			+ "." + BaseColumns._ID + " order by " + C.MISS_SUM_STUNDEN_Z
+			+ " desc, " + C.MISS_SUM_STUNDEN_E + " desc";
+
+	private static final String SETTINGS_TABLE_CREATE = "create table "
+			+ C.SETTINGS_TABLE + " (" + BaseColumns._ID
+			+ " integer primary key autoincrement, " + C.SETTINGS_NAME
+			+ " text, " + C.SETTINGS_VALUE_INT + " integer, "
+			+ C.SETTINGS_VALUE_TEXT + " text)";			
 
 	private SQLiteOpenHelper db_helper;
 	private static final UriMatcher mUriMatcher;
 
 	static {
-		StringBuilder b = new StringBuilder(C.COURSE_SEGMENT);
+		StringBuilder b = new StringBuilder(C.SETTINGS_SEGMENT);
 		mUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+		mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), SETTINGS);
+		
+		b = new StringBuilder(C.COURSE_SEGMENT);
 		// .../course
 		mUriMatcher.addURI(Schule.AUTHORITY, b.toString(), COURSE);
 
@@ -126,6 +147,9 @@ public class SchoolProvider extends ContentProvider {
 				if (oldVersion < 2) {
 					upgrade1(db);
 				}
+				if(oldVersion < 3) {
+					upgrade2(db);
+				}
 				// Log.w(TAG, "Upgrading database from version " + oldVersion +
 				// " to "
 				// + newVersion + ", which will destroy all old data");
@@ -151,6 +175,29 @@ public class SchoolProvider extends ContentProvider {
 				db.endTransaction();
 			}
 
+			private void upgrade2(SQLiteDatabase db) {
+				db.beginTransaction();
+				try {
+					db.execSQL(SETTINGS_TABLE_CREATE);
+					db.execSQL("INSERT INTO " + C.SETTINGS_TABLE + "("
+							+ C.SETTINGS_NAME + "," + C.SETTINGS_VALUE_INT
+							+ ")" + " VALUES " + "('"
+							+ C.STARTDATE_SUM_MISS_SETTING + "'," + "0)");
+					db.execSQL("INSERT INTO " + C.SETTINGS_TABLE + "("
+							+ C.SETTINGS_NAME + "," + C.SETTINGS_VALUE_INT
+							+ ")" + " VALUES " + "('"
+							+ C.ENDDATE_SUM_MISS_SETTING + "'," + "null)");
+
+					db.execSQL("DROP VIEW " + C.PUPIL_MISS_VIEW);
+					db.execSQL(MISS_VIEW_CREATE);
+					db.setTransactionSuccessful();
+				} catch (SQLiteException e) {
+					Log.e(TAG, e.getMessage());
+				} finally {
+					db.endTransaction();
+				}
+			}
+
 			@Override
 			public void onCreate(SQLiteDatabase db) {
 				db.execSQL("PRAGMA foreign_keys=ON;");
@@ -171,12 +218,13 @@ public class SchoolProvider extends ContentProvider {
 		};
 		return true;
 	}
-//	09-18 20:37:37.626: ERROR/AndroidRuntime(2814): Caused by: android.database.sqlite.SQLiteException: ambiguous column name: _id: , while compiling: SELECT kurs._id, name, COUNT(nachname) FROM kurs LEFT JOIN schueler ON kurs._id=kursid GROUP BY _id,name ORDER BY name
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
 			String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
+		SQLiteDatabase db = db_helper.getReadableDatabase();
+
         Map<String, String> projMap = new HashMap<String, String>();
 
         String groupBy = null;
@@ -262,8 +310,6 @@ public class SchoolProvider extends ContentProvider {
 			throw new IllegalArgumentException("SchoolProvider.query: Unknown URI " + uri);
 		}
 		Log.d(TAG, qb.buildQuery(projection, selection, null, null, null, null, null));
-		
-		SQLiteDatabase db = db_helper.getReadableDatabase();
 
 		return qb.query(db, projection, selection, selectionArgs, groupBy, null, sortOrder);
 	}
@@ -420,7 +466,6 @@ public class SchoolProvider extends ContentProvider {
 		SQLiteDatabase db = db_helper.getWritableDatabase();
 		String tableName;
 		int count;
-		String id = uri.getLastPathSegment();
 		switch (mUriMatcher.match(uri)) {
 		case COURSE_ID:
 			tableName = C.KURS_TABLE;
@@ -431,12 +476,14 @@ public class SchoolProvider extends ContentProvider {
 		case MISS_ID:
 			tableName = C.MISS_TABLE;
 			break;
+		case SETTINGS:
+			tableName = C.SETTINGS_TABLE;
+			break;
 		default:
 			throw new IllegalArgumentException(
 					"SchoolProvider.update: Unknown URI " + uri);
 		}
-		count = db.update(tableName, values, C._ID + "=" + id
-					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
+		count = db.update(tableName, values, selection, selectionArgs);
 		getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}

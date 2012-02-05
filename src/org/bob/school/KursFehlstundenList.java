@@ -1,5 +1,6 @@
 package org.bob.school;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -18,6 +19,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -44,6 +46,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 	private Uri mUri; // .../course/#/miss (COURSE_MISS)
 	private String mCourseId;
 	private String mCourseName;
+	private Calendar mSDatum, mEDatum;
 	private int[] mWeekHours = new int[5];
 	private ExpandableListView mExpListView;
 
@@ -147,6 +150,8 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		c = getContentResolver().query(uri, null, null, null, null);
 		c.moveToFirst();
 		mCourseName = c.getString(c.getColumnIndex(C.KURS_NAME));
+		(mSDatum = Calendar.getInstance()).setTimeInMillis(c.getLong(c.getColumnIndex(C.KURS_SDATE)));
+		(mEDatum = Calendar.getInstance()).setTimeInMillis(c.getLong(c.getColumnIndex(C.KURS_EDATE)));
 
 		for (int i = 0; i < 5; ++i)
 			mWeekHours[i] = c.getInt(c.getColumnIndex(C.KURS_WDAYS[i]));
@@ -161,8 +166,10 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		c = managedQuery(
 				mUri.buildUpon()
 						.appendQueryParameter(
-								C.QUERY_DISTINCT_DATES_WITH_ID_HACK,
-								"1").build(), null, null, null,
+								C.QUERY_DISTINCT_DATES_WITH_ID_HACK, "1")
+						.build(), null, C.MISS_DATUM + " between ? and ?",
+				new String[] { String.valueOf(mSDatum.getTimeInMillis()),
+						String.valueOf(mEDatum.getTimeInMillis()) },
 				DEFAULT_SORT_ORDER_DATE);
 		c.setNotificationUri(getContentResolver(), mUri);
 
@@ -202,9 +209,8 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 			else
 				// excused hours are 0, so toggle miss_ex to the value of miss
 				values.put(C.MISS_STUNDEN_E, miss);
-
 			getContentResolver().update(SchoolTools.buildMissUri(id), values,
-					null, null);
+					BaseColumns._ID + "=?", new String[] { String.valueOf(id) });
 			getContentResolver().notifyChange(mUri, null);
 		}
 		return true;
@@ -221,30 +227,34 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		menu.add(Menu.NONE, MENU_ITEM_ADD_MISSES, 0,
 				R.string.menu_misses_insert)
 				.setShortcut('1', 'a')
-				.setIcon(android.R.drawable.ic_menu_close_clear_cancel)
+				.setIcon(R.drawable.ic_menu_close_clear_cancel)
 				.setIntent(
 						new Intent(
 								KursFehlstundenEditor.ACTION_ADD_COURSE_MISSES,
 								uri));
-		menu.add(Menu.NONE, MENU_ITEM_EXPORT, 0, R.string.menu_export);
+		menu.add(Menu.NONE, MENU_ITEM_EXPORT, 0, R.string.menu_export)
+				.setIcon(R.drawable.ic_menu_export).setShortcut('2', 'x');
 
 		return super.onCreateOptionsMenu(menu);
 	}
+
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item){
+	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case MENU_ITEM_EXPORT:
+			File filename = new ExportToFile("tage_fehlstunden_"
+					+ mUri.getPathSegments().get(1) + "_")
+					.append(this, R.string.exportheader)
+					.append(generateHtml(((MySimpleCursorTreeAdapter) mExpListView
+							.getExpandableListAdapter())))
+					.append(this, R.string.exportfooter).exportFile()
+					.getAbsoluteFile();
 			Toast.makeText(
 					KursFehlstundenList.this,
-					getResources().getString(
-							R.string.export_as_file,
-							new ExportToFile("tage_fehlstunden_"
-									+ mUri.getPathSegments().get(1) + "_")
-									.append(this, R.string.exportheader)
-									.append(generateHtml())
-									.append(this, R.string.exportfooter)
-									.exportFile().getAbsoluteFile()),
+					getResources().getString(R.string.export_as_file, filename),
 					Toast.LENGTH_SHORT).show();
+			startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(
+					Uri.fromFile(filename), "text/html"));
 			break;
 		}
 		return super.onOptionsItemSelected(item);
@@ -352,8 +362,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
         return b;
 	}
 
-	private StringBuilder generateHtml() {
-		MySimpleCursorTreeAdapter cta = ((MySimpleCursorTreeAdapter)mExpListView.getExpandableListAdapter());
+	private StringBuilder generateHtml(MySimpleCursorTreeAdapter cta) { 
 		Cursor c = cta.getCursor();
 		Cursor cc;
 		c.moveToFirst();

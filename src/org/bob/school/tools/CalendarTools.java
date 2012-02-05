@@ -14,6 +14,8 @@ public class CalendarTools {
 
 	public static final DateFormat LISTVIEW_DATE_FORMATER = new SimpleDateFormat(listViewDateFormat);
 	public static final DateFormat FILENAME_DATE_FORMATER = new SimpleDateFormat(filenameDateFormat);
+	public static final DateFormat MEDIUM_DATE_FORMATTER = SimpleDateFormat
+			.getDateInstance(SimpleDateFormat.MEDIUM);
 
 	/**  Reset the time to 0:00.0 (i.e. 12:00.0 AM), date stays unchanged
 	 * @param c calendar to reset

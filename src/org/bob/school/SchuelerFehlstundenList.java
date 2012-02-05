@@ -1,5 +1,7 @@
 package org.bob.school;
 
+import java.io.File;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -20,8 +22,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.text.InputType;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -62,6 +64,8 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 	private Uri mUri;          // data: .../course/#
 	private Uri mWorkingUri;   // data: .../course/#/pupil
 	private short mSortOrderCode = 0;
+	private String mTitle;
+	private Calendar mSDatum, mEDatum;
 	
 	private static class MyPupilListViewBinder implements
 			SimpleCursorTreeAdapter.ViewBinder {
@@ -119,12 +123,14 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 		mUri = getIntent().getData();
 		mWorkingUri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);
 
-		// get course name
-		// Cursor c = getContentResolver().query(mUri,
-		// new String[] { C.KURS_NAME }, null, null, null);
-		// c.moveToFirst();
-		// mTitle = c.getString(c.getColumnIndex(C.KURS_NAME));
-		// c.close();
+		// get course data
+		Cursor c = getContentResolver().query(mUri,
+				new String[] { C.KURS_NAME, C.KURS_SDATE, C.KURS_EDATE }, null, null, null);
+		c.moveToFirst();
+		mTitle = c.getString(c.getColumnIndex(C.KURS_NAME));
+		(mSDatum = Calendar.getInstance()).setTimeInMillis(c.getLong(c.getColumnIndex(C.KURS_SDATE)));
+		(mEDatum = Calendar.getInstance()).setTimeInMillis(c.getLong(c.getColumnIndex(C.KURS_EDATE)));
+		c.close();
 
 		registerForContextMenu(getExpandableListView());
 
@@ -135,6 +141,14 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		Uri settings_uri = Uri.withAppendedPath(C.CONTENT_URI, C.SETTINGS_SEGMENT);
+		ContentValues vals = new ContentValues();
+		vals.put(C.SETTINGS_VALUE_INT, mSDatum.getTimeInMillis());
+		getContentResolver().update(settings_uri, vals, C.SETTINGS_NAME + "=?", new String[] { C.STARTDATE_SUM_MISS_SETTING });
+		vals.clear();
+		vals.put(C.SETTINGS_VALUE_INT, mEDatum.getTimeInMillis());
+		getContentResolver().update(settings_uri, vals, C.SETTINGS_NAME + "=?", new String[] { C.ENDDATE_SUM_MISS_SETTING });
+
 		getContentResolver().notifyChange(mUri, null);
 	}
 
@@ -162,10 +176,15 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 			protected Cursor getChildrenCursor(Cursor groupCursor) {
 				Uri uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT);
 				groupCursor.getInt(0);
-				Cursor c = managedQuery(uri, new String[] { C._ID,
-						C.MISS_DATUM, C.MISS_STUNDEN_Z, C.MISS_STUNDEN_E,
-						C.MISS_STUNDEN_NZ }, C.MISS_SCHUELERID + "= ?",
-						new String[] { groupCursor.getString(0) },
+				Cursor c = managedQuery(
+						uri,
+						new String[] { C._ID, C.MISS_DATUM, C.MISS_STUNDEN_Z,
+								C.MISS_STUNDEN_E, C.MISS_STUNDEN_NZ },
+						C.MISS_SCHUELERID + "= ? and " + C.MISS_DATUM
+								+ " between ? and ?",
+						new String[] { groupCursor.getString(0),
+								String.valueOf(mSDatum.getTimeInMillis()),
+								String.valueOf(mEDatum.getTimeInMillis()) },
 						SORT_ORDER_DATE);
 				c.setNotificationUri(getContentResolver(), uri);
 				return c;
@@ -175,19 +194,6 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 				
 		sca.setViewBinder(new MyPupilListViewBinder());
 		setListAdapter(sca);
-	}
-
-	private String getSortOrder() {
-		if(mSortOrderCode == 0)
-			return SORT_ORDER_NAME;
-		else
-			return SORT_ORDER_MISS;
-	}
-
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		Log.d(TAG, "Destroying SchuelerList activity");
 	}
 
 	// clicking on a list item toggles between excused and unexcused
@@ -212,7 +218,8 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 				// excused hours are 0, so toggle miss_ex to the value of miss
 				values.put(C.MISS_STUNDEN_E, miss);
 
-			getContentResolver().update(SchoolTools.buildMissUri(id), values, null, null);
+			getContentResolver().update(SchoolTools.buildMissUri(id), values,
+					BaseColumns._ID + "=?", new String[] { String.valueOf(id) });
 			getContentResolver().notifyChange(mUri, null);
 		}
 
@@ -222,15 +229,18 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add(Menu.NONE, MENU_ITEM_ADD_PUPIL, 0, R.string.menu_pupil_insert)
-				.setShortcut('1', 'i').setIcon(android.R.drawable.ic_menu_add);
+				.setShortcut('1', 'i').setIcon(R.drawable.ic_menu_add);
 		menu.add(Menu.NONE, MENU_ITEM_EDIT_COURSE, 0, R.string.menu_course_edit)
-				.setShortcut('2', 'e').setIcon(android.R.drawable.ic_menu_edit)
+				.setShortcut('2', 'e').setIcon(R.drawable.ic_menu_edit)
 				.setIntent(new Intent(Intent.ACTION_EDIT, mUri));
-		menu.add(Menu.NONE, MENU_ITEM_DELETE_COURSE, 0, R.string.menu_course_delete)
-				.setShortcut('3', 'd').setIcon(android.R.drawable.ic_menu_delete);
+		menu.add(Menu.NONE, MENU_ITEM_DELETE_COURSE, 0,
+				R.string.menu_course_delete).setShortcut('3', 'd')
+				.setIcon(R.drawable.ic_menu_delete);
 		menu.add(Menu.NONE, MENU_SORT_LIST, 0, R.string.menu_sort_by_size)
 				.setShortcut('4', 's');
-		menu.add(Menu.NONE, MENU_ITEM_EXPORT, 0, R.string.menu_export);
+		menu.add(Menu.NONE, MENU_ITEM_EXPORT, 0, R.string.menu_export)
+				.setIcon(R.drawable.ic_menu_export).setShortcut('5', 'x');
+		;
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -238,7 +248,6 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MenuItem soi = menu.getItem(3);
-//		MenuItem exi = menu.getItem(4);
 
 		if(mSortOrderCode==0) {
 			soi.setIcon(android.R.drawable.ic_menu_sort_by_size);
@@ -270,17 +279,24 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 			createPupilList();
 			break;
 		case MENU_ITEM_EXPORT:
+			File filename = new ExportToFile("kurs_fehlstunden_"
+					+ mUri.getLastPathSegment() + "_")
+					.append(SchuelerFehlstundenList.this,
+							R.string.exportheader)
+					.append(generateHtml(((CursorTreeAdapter) getExpandableListAdapter())
+							.getCursor()))
+					.append(SchuelerFehlstundenList.this,
+							R.string.exportfooter)
+					.exportFile().getAbsoluteFile();
 			Toast.makeText(
 					SchuelerFehlstundenList.this,
-					getResources().getString(
-							R.string.export_as_file,
-							new ExportToFile("kurs_fehlstunden_"
-									+ mUri.getLastPathSegment() + "_")
-									.append(this, R.string.exportheader)
-									.append(generateHtml())
-									.append(this, R.string.exportfooter)
-									.exportFile().getAbsoluteFile()),
-					Toast.LENGTH_SHORT).show();
+					getResources()
+							.getString(
+									R.string.export_as_file, filename),
+					Toast.LENGTH_LONG).show();
+			
+			startActivity(new Intent(Intent.ACTION_VIEW).setDataAndType(
+					Uri.fromFile(filename), "text/html"));
 			break;
 		}
 
@@ -362,8 +378,12 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 											name[0]);
 									values.put(C.SCHUELER_VORNAME,
 											name[1]);
-									getContentResolver().update(uri, values,
-											null, null);
+									getContentResolver().update(
+											uri,
+											values,
+											BaseColumns._ID,
+											new String[] { uri
+													.getLastPathSegment() });
 									// notify managed cursor of this ListView
 									// about the change
 									getContentResolver().notifyChange(
@@ -431,19 +451,26 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 				.create();
 	}
 
-	private StringBuilder generateHtml() {
+	private StringBuilder generateHtml(Cursor c) {
 		StringBuilder b = new StringBuilder();
 		b.append("<table><tr><th>Name</th><th>Fehlstunden</th><th>unentschuldigt</th></tr>");
-		Cursor c = ((CursorTreeAdapter)getExpandableListAdapter()).getCursor();
 		c.moveToFirst();
 		while(!c.isAfterLast()) {
 			b.append("<tr><td>").append(c.getString(1)).append(", ")
 			.append(c.getString(2)).append("</td><td>")
 			.append(StringTools.writeZeroIfNull(c.getString(3))).append("</td><td>")
-			.append(StringTools.writeZeroIfNull(c.getString(4))).append("</td></tr>\n");
+			.append(c.getInt(3)-c.getInt(4)).append("</td></tr>\n");
 			c.moveToNext();
 		}
 		b.append("</table>");
 		return b;
 	}
+
+	private String getSortOrder() {
+		if(mSortOrderCode == 0)
+			return SORT_ORDER_NAME;
+		else
+			return SORT_ORDER_MISS;
+	}
+
 }

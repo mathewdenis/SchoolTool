@@ -28,7 +28,8 @@
 
 	<string name="kurs_edit_name">Name des Kurses</string>
 	<string name="kurs_start">Kursbeginn</string>
-	<string name="kurs_end">Kursende</string>
+	<string name="kurs_end">Kursende</string>	
+	<string name="kurs_anzeige_fehlstunden">Anzeigezeitraum der Fehlstunden</string>
 	<string name="kurs_stunden">Stunden des Kurses</string>
 	<string name="sum_wd">Stundenzahl des Kurses an diesem Wochentag</string>
 	<string name="wd_mon">Montag</string>
@@ -39,8 +40,11 @@
 	<string name="miss_caption">Fehlstunden</string>
 	<string name="miss_excused_caption">Fehlstunden entschuldigt</string>
 	<string name="miss_count_caption">Fehlstunden zählen</string>
-	<string name="sum_count">Nicht als Fehlstunden zählen etwa Schulveranstaltungen</string><string name="date_caption">Datum</string>
-	
+	<string name="sum_count">Nicht als Fehlstunden zählen etwa Schulveranstaltungen</string>
+	<string name="date_caption">Datum</string>
+	<string name="sdate_caption">Startdatum</string>
+	<string name="edate_caption">Enddatum</string>
+		
 	<string name="kurs_details">Details</string>
 	<string name="kurs_save">Speichern</string>
 	<string name="kurs_cancel">Abbrechen</string>

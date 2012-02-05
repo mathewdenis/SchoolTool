@@ -78,4 +78,5 @@ public class StringTools {
 	static public String writeZeroIfNull(String s) {
 		return s==null?"0":s;
 	}
+
 }

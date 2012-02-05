@@ -42,6 +42,9 @@ public class ExportToFile {
 		return this;
 	}
 
+	/** Write export to file and return the file object. 
+	 * @return File object of export file
+	 */
 	public File exportFile() {
 		File fname = null;
 		try {

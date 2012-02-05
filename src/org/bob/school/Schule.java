@@ -24,6 +24,10 @@ public class Schule {
 		 */
 		public static final String MISS_SEGMENT = "miss";
 
+		/** The URI-segment identifying a course
+		 */
+		public static final String SETTINGS_SEGMENT = "settings";
+
 		/**
 		 * The MIME type of {@link #CONTENT_URI} providing a directory of
 		 * courses.
@@ -78,6 +82,11 @@ public class Schule {
 		 */		
 		public static final String QUERY_PUPIL_COUNT = "queryPupilCount";
 
+		/** Query a sum-miss query with a given date unto the misses are
+		 *  computed
+		 */
+		public static final String QUERY_MISS_WITH_DATE = "queryMissWithDate";
+
 //		public static final String _ALT_ID = "_id2";
 
 		public static final String SCHUELER_TABLE = "schueler";
@@ -101,7 +110,16 @@ public class Schule {
 		public static final String MISS_GRUND = "grund";
 		public static final String MISS_BEMERKUNG = "bemerkung";
 
+		public static final String SETTINGS_TABLE = "einstellungen";
+		public static final String SETTINGS_NAME = "name";
+		public static final String SETTINGS_VALUE_TEXT = "wert_text";
+		public static final String SETTINGS_VALUE_INT = "wert_int";
+
+		public static final String ENDDATE_SUM_MISS_SETTING = "enddate_sum_miss";
+		public static final String STARTDATE_SUM_MISS_SETTING = "startdatum_sum_miss";
+
 		public static final String PUPIL_MISS_VIEW = "schueler_versaeumnis_sum";
+		public static final String TEMP_PUPIL_DATE_MISS_VIEW = "temp_schueler_datum_versaeumnis_sum";
 		public static final String MISS_SUM_STUNDEN_Z = "sum_std_z";
 		public static final String MISS_SUM_STUNDEN_NZ = "sum_std_nz";
 		public static final String MISS_SUM_STUNDEN_E = "sum_std_e";

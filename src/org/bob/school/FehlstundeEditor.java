@@ -23,6 +23,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
+import android.provider.BaseColumns;
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -150,7 +151,7 @@ public class FehlstundeEditor extends PreferenceActivity implements
 				getIntent().setData(uri);
 				setResult(RESULT_OK, getIntent());
 			} else
-				getContentResolver().update(mUri, values, null, null);
+				getContentResolver().update(mUri, values, BaseColumns._ID + "=?", new String[] { mUri.getLastPathSegment() });
 		} catch (SQLiteConstraintException ce) {
 			Toast.makeText(
 					this,
@@ -166,33 +167,6 @@ public class FehlstundeEditor extends PreferenceActivity implements
 	public void cancelClicked(View v) {
 		setResult(RESULT_CANCELED);
 		finish();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE, MENU_ITEM_DELETE, 0, R.string.menu_miss_delete)
-				.setShortcut('1', 'i')
-				.setIcon(android.R.drawable.ic_menu_delete);
-
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case MENU_ITEM_DELETE:
-			AlertDialogs.createOKCancelDialog(this, new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					getContentResolver().delete(mUri, null, null);
-					finish();
-				}
-			}, R.string.dialog_confirm_delete_title,
-					R.string.dialog_confirm_delete_miss).show();
-			break;
-		}
-
-		return super.onOptionsItemSelected(item);
 	}
 
 	private void guiUpdatePrefs(Cursor c) {
