@@ -176,7 +176,7 @@ public class FehlstundeEditor extends PreferenceActivity implements
 							C.CONTENT_COURSE_TYPE), null, null, null, null);
 			c.moveToFirst();
 			String todaysHours = String.valueOf(Math.max(1,
-					CalendarTools.getTodaysHours(c)));
+					CalendarTools.getTodaysHours(c, Calendar.getInstance())));
 			mMiss.setValue(todaysHours);
 			mMiss.setSummary(todaysHours);
 			mCount.setChecked(true);

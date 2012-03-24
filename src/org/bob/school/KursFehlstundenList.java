@@ -37,13 +37,20 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 	private static final String DEFAULT_SORT_ORDER_NAME = C.SCHUELER_NACHNAME
 			+ " COLLATE NOCASE," + C.SCHUELER_VORNAME + " COLLATE NOCASE";
 
-	private static final int MENU_ITEM_ADD_MISSES = Menu.FIRST;
-	private static final int MENU_ITEM_EDIT_MISS = Menu.FIRST + 1;
-	private static final int MENU_ITEM_DELETE_MISS = Menu.FIRST + 2;
-	private static final int MENU_ITEM_SV_SWOP= Menu.FIRST + 3;
-	private static final int MENU_ITEM_DELETE_MISS_ALL = Menu.FIRST + 4;
-	private static final int MENU_ITEM_EXPORT = Menu.FIRST + 5;
+	// options menu
+	private static final int MENU_ITEM_EXPORT = Menu.FIRST;
 
+	// parent context menu
+	private static final int MENU_ITEM_DELETE_MISS_ALL = Menu.FIRST + 1;
+
+	// child context menu
+	private static final int MENU_ITEM_EDIT_MISS = Menu.FIRST + 2;
+	private static final int MENU_ITEM_DELETE_MISS = Menu.FIRST + 3;
+	private static final int MENU_ITEM_SV_SWOP= Menu.FIRST + 4;
+
+	// common menu items
+	private static final int MENU_ITEM_ADD_MISSES = Menu.FIRST + 5;
+	
 	private Uri mUri; // .../course/#/miss (COURSE_MISS)
 	private String mCourseId;
 	private String mCourseName;
@@ -216,8 +223,6 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 			getContentResolver().notifyChange(mUri, null);
 		}
 		return true;
-		// old version of onItemClick (opens the miss editor)
-		//		startActivity(new Intent(FehlstundeEditor.ACTION_ADD_EDIT_MISS, uri));
 	}
 
 	@Override
@@ -293,6 +298,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 			menuHeader = CalendarTools.LISTVIEW_DATE_FORMATER.format(new Date(c
 					.getLong(c.getColumnIndex(C.MISS_DATUM))));
 
+			menu.add(Menu.NONE, MENU_ITEM_ADD_MISSES, 0, R.string.menu_misses_insert);
 			menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS_ALL, 0, R.string.menu_miss_delete_all);
 		}
         // set the menu header title
@@ -306,10 +312,11 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 
 		final ExpandableListView.ExpandableListContextMenuInfo info =
 			(ExpandableListView.ExpandableListContextMenuInfo) item.getMenuInfo();
-
+		Cursor c;
 		final Uri uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT);
 		
         switch(item.getItemId()) {
+		// child menu items
         case MENU_ITEM_DELETE_MISS :
         	final Uri modUri = ContentUris.withAppendedId(uri, info.id);
 
@@ -327,12 +334,33 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 					R.string.dialog_confirm_delete_miss).show();
 			b = true;
         	break;
+		case MENU_ITEM_SV_SWOP:
+			c = mSCTAdapter.getChild(
+					ExpandableListView.getPackedPositionGroup(info.packedPosition),
+					ExpandableListView.getPackedPositionChild(info.packedPosition));
+			int miss = c.getInt(3);
+			int miss_not_count = c.getInt(5);
+			ContentValues v = new ContentValues();
+			if(miss_not_count>0) {
+				v.put(C.MISS_STUNDEN_NZ, 0);
+				v.put(C.MISS_STUNDEN_Z, miss_not_count);
+			}
+			else {
+				v.put(C.MISS_STUNDEN_Z, 0);
+				v.put(C.MISS_STUNDEN_NZ, miss);
+			}
+			v.put(C.MISS_STUNDEN_E, 0);
+			getContentResolver().update(SchoolTools.buildMissUri(info.id), v,
+					BaseColumns._ID + "=?", new String[] { String.valueOf(info.id) });
+			b = true;
+			// getContentResolver().notifyChange(mUri, null);
+			break;
 
+		// parent menu items
 		case MENU_ITEM_DELETE_MISS_ALL:
 			AlertDialogs.createOKCancelDialog(
 					this,
 					new OnClickListener() {
-
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							int pgroup = ExpandableListView
@@ -359,25 +387,19 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 					R.string.dialog_confirm_delete_miss_all).show();
 			b = true;
 			break;
-		case MENU_ITEM_SV_SWOP:
-			Cursor c = mSCTAdapter.getChild(
-					ExpandableListView.getPackedPositionGroup(info.packedPosition),
-					ExpandableListView.getPackedPositionChild(info.packedPosition));
-			int miss = c.getInt(3);
-			int miss_not_count = c.getInt(5);
-			ContentValues v = new ContentValues();
-			if(miss_not_count>0) {
-				v.put(C.MISS_STUNDEN_NZ, 0);
-				v.put(C.MISS_STUNDEN_Z, miss_not_count);
-			}
-			else {
-				v.put(C.MISS_STUNDEN_Z, 0);
-				v.put(C.MISS_STUNDEN_NZ, miss);
-			}
-			v.put(C.MISS_STUNDEN_E, 0);
-			getContentResolver().update(SchoolTools.buildMissUri(info.id), v,
-					BaseColumns._ID + "=?", new String[] { String.valueOf(info.id) });
-			getContentResolver().notifyChange(mUri, null);
+		case MENU_ITEM_ADD_MISSES:
+			int pgroup = ExpandableListView
+					.getPackedPositionGroup(info.packedPosition);
+
+			Uri c_uri = Uri
+					.withAppendedPath(C.CONTENT_URI, C.COURSE_SEGMENT)
+					.buildUpon()
+					.appendPath(mUri.getPathSegments().get(1))
+					.appendQueryParameter(C.QUERY_MISS_WITH_DATE,
+							mSCTAdapter.getGroup(pgroup).getString(1)).build();
+
+			Intent intent = new Intent(KursFehlstundenEditor.ACTION_ADD_COURSE_MISSES, c_uri);
+			startActivity(intent);
 			break;
 		}
 

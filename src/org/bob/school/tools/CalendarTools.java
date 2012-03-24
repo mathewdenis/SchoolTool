@@ -28,14 +28,14 @@ public class CalendarTools {
 		c.set(Calendar.MILLISECOND, 0);
 	}
 
-	/** Return the number of hours for today's day of week (today is
-	 * the runtime date) for the given course settings
+	/** Return the number of hours for a given date and course settings.
 	 * @param c A cursor to course settings where this information can
 	 * be retrieved.
+	 * @param day The date for which to return the hours
 	 * @return The number of hours, -1 if it's weekend (i.e. Saturday or Sunday)
 	 */
-	public static int getTodaysHours(Cursor c) {
-		int dOfW = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+	public static int getTodaysHours(Cursor c, Calendar day) {
+		int dOfW = day.get(Calendar.DAY_OF_WEEK);
 		if (dOfW >= Calendar.MONDAY && dOfW <= Calendar.FRIDAY) {
 			int index = c.getColumnIndexOrThrow(C.KURS_WDAYS[dOfW - 2]);
 			return c.getInt(index);

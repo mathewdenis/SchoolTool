@@ -76,7 +76,11 @@ public class KursFehlstundenEditor extends Activity implements
 
 		setTitle(getTitle() + ": " + mCourseName);
 
+		String queryDate;
+
 		today = Calendar.getInstance();
+		if((queryDate = mUri.getQueryParameter(C.QUERY_MISS_WITH_DATE)) != null)
+			today.setTimeInMillis(Long.valueOf(queryDate));
 
 		mDateEditText = (EditText) findViewById(R.id.miss_edittext);
 		mDateEditText.setText(CalendarTools.MEDIUM_DATE_FORMATTER.format(today.getTime()));
@@ -96,7 +100,7 @@ public class KursFehlstundenEditor extends Activity implements
 		mHoursAdapter = (ArrayAdapter<String>) mCourseHoursSpinner.getAdapter();
 
 		mCourseHoursSpinner.setSelection(mHoursAdapter.getPosition(String
-				.valueOf(Math.max(1, CalendarTools.getTodaysHours(mCursor)))));
+				.valueOf(Math.max(1, CalendarTools.getTodaysHours(mCursor, today)))));
 
 		// query
 		Uri uri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);

@@ -3,6 +3,7 @@ package org.bob.school.db;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bob.school.R;
 import org.bob.school.Schule;
 import org.bob.school.Schule.C;
 import org.bob.school.tools.StringTools;
@@ -24,6 +25,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 public class SchoolProvider extends ContentProvider {
 	public static final String DATABASE_NAME = "schooltool.db";
@@ -451,9 +453,13 @@ public class SchoolProvider extends ContentProvider {
 			}
 			db.setTransactionSuccessful();
 		} catch (SQLiteConstraintException ce) {
-			Log.e(TAG, "bulkInsert constraint violated: " + uri, ce);					
+			Log.e(TAG, "bulkInsert constraint violated: " + uri, ce);
 			Log.e(TAG, "data: " + cur_val);
-			throw new SQLiteException("bulk insert failed.");
+			Toast.makeText(
+					this.getContext(),
+					getContext().getResources().getString(
+							R.string.toast_bulk_insert_constraint_violation),
+					Toast.LENGTH_LONG).show();
 		} finally {
 			db.endTransaction();
 		}
