@@ -3,7 +3,6 @@ package org.bob.school.db;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bob.school.R;
 import org.bob.school.Schule;
 import org.bob.school.Schule.C;
 import org.bob.school.tools.StringTools;
@@ -25,7 +24,6 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 public class SchoolProvider extends ContentProvider {
 	public static final String DATABASE_NAME = "schooltool.db";
@@ -309,7 +307,7 @@ public class SchoolProvider extends ContentProvider {
 		default:
 			throw new IllegalArgumentException("SchoolProvider.query: Unknown URI " + uri);
 		}
-		Log.d(TAG, qb.buildQuery(projection, selection, null, null, null, null, null));
+		Log.d(TAG, qb.buildQuery(projection, selection, selectionArgs, groupBy, null, sortOrder, null));
 
 		return qb.query(db, projection, selection, selectionArgs, groupBy, null, sortOrder);
 	}
@@ -416,6 +414,7 @@ public class SchoolProvider extends ContentProvider {
 		SQLiteDatabase db = db_helper.getWritableDatabase();
 		SQLiteStatement insert;
 		db.beginTransaction();
+		ContentValues cur_val  = null;
 		int numInserts = 0;
 		try {
 			switch (mUriMatcher.match(uri)) {
@@ -425,6 +424,7 @@ public class SchoolProvider extends ContentProvider {
 						+ C.MISS_STUNDEN_NZ + "," + C.MISS_STUNDEN_E + ","
 						+ C.MISS_SCHUELERID + ") VALUES (?,?,?,?,?)");
 				for (ContentValues v : values) {
+					cur_val = v;
 					insert.bindLong(1, v.getAsLong(C.MISS_DATUM));
 					insert.bindLong(2, v.getAsInteger(C.MISS_STUNDEN_Z));
 					insert.bindLong(3, v.getAsInteger(C.MISS_STUNDEN_NZ));
@@ -436,10 +436,12 @@ public class SchoolProvider extends ContentProvider {
 			case COURSE_PUPIL:
 				insert = db.compileStatement("INSERT INTO " + C.SCHUELER_TABLE
 						+ "(" + C.SCHUELER_NACHNAME + "," + C.SCHUELER_VORNAME
-						+ ") VALUES (?,?)");
+						+ "," + C.SCHUELER_KURSID + ") VALUES (?,?,?)");
 				for (ContentValues v : values) {
+					cur_val = v;
 					insert.bindString(1, v.getAsString(C.SCHUELER_NACHNAME));
 					insert.bindString(2, v.getAsString(C.SCHUELER_VORNAME));
+					insert.bindString(3, uri.getPathSegments().get(1));
 					numInserts += insert.executeInsert();
 				}
 				break;
@@ -449,11 +451,9 @@ public class SchoolProvider extends ContentProvider {
 			}
 			db.setTransactionSuccessful();
 		} catch (SQLiteConstraintException ce) {
-			Toast.makeText(
-					this.getContext(),
-					getContext().getResources().getString(
-							R.string.toast_bulk_insert_constraint_violation),
-					Toast.LENGTH_LONG).show();
+			Log.e(TAG, "bulkInsert constraint violated: " + uri, ce);					
+			Log.e(TAG, "data: " + cur_val);
+			throw new SQLiteException("bulk insert failed.");
 		} finally {
 			db.endTransaction();
 		}

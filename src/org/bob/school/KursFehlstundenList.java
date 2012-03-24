@@ -40,8 +40,9 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 	private static final int MENU_ITEM_ADD_MISSES = Menu.FIRST;
 	private static final int MENU_ITEM_EDIT_MISS = Menu.FIRST + 1;
 	private static final int MENU_ITEM_DELETE_MISS = Menu.FIRST + 2;
-	private static final int MENU_ITEM_DELETE_MISS_ALL = Menu.FIRST + 3;
-	private static final int MENU_ITEM_EXPORT = Menu.FIRST + 4;
+	private static final int MENU_ITEM_SV_SWOP= Menu.FIRST + 3;
+	private static final int MENU_ITEM_DELETE_MISS_ALL = Menu.FIRST + 4;
+	private static final int MENU_ITEM_EXPORT = Menu.FIRST + 5;
 
 	private Uri mUri; // .../course/#/miss (COURSE_MISS)
 	private String mCourseId;
@@ -49,6 +50,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 	private Calendar mSDatum, mEDatum;
 	private int[] mWeekHours = new int[5];
 	private ExpandableListView mExpListView;
+	private MySimpleCursorTreeAdapter mSCTAdapter;
 
 	private static class MySimpleCursorTreeAdapter extends SimpleCursorTreeAdapter {
 		private Activity mActivity;
@@ -174,14 +176,14 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		c.setNotificationUri(getContentResolver(), mUri);
 
 		// set the expandable list adapter
-		MySimpleCursorTreeAdapter cta = new MySimpleCursorTreeAdapter(this,
+		mSCTAdapter = new MySimpleCursorTreeAdapter(this,
 				mUri, c, android.R.layout.simple_expandable_list_item_1,
 				new String[] { C._ID }, new int[] { android.R.id.text1 },
 				android.R.layout.simple_expandable_list_item_2, new String[] {
 						C.SCHUELER_NACHNAME, C.MISS_STUNDEN_Z }, new int[] {
 						android.R.id.text1, android.R.id.text2 });
-		cta.setViewBinder(new DateBinder());
-		mExpListView.setAdapter(cta);
+		mSCTAdapter.setViewBinder(new DateBinder());
+		mExpListView.setAdapter(mSCTAdapter);
 	}
 
 	@Override
@@ -283,8 +285,8 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 			menu.add(Menu.NONE, MENU_ITEM_EDIT_MISS, 0, R.string.title_fehlstunde_edit)
 					.setIntent(new Intent(Intent.ACTION_EDIT,
 									      SchoolTools.buildMissUri(info.id)));
-			menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS, 0,
-					R.string.menu_miss_delete);
+			menu.add(Menu.NONE, MENU_ITEM_SV_SWOP, 0, R.string.title_fehlstunde_sv_wechsel);
+			menu.add(Menu.NONE, MENU_ITEM_DELETE_MISS, 0, R.string.menu_miss_delete);
 		} else if(ptype == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
         	Cursor c = (Cursor) mExpListView.getExpandableListAdapter().getGroup(pgroup);
 
@@ -356,6 +358,26 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 					}, R.string.dialog_confirm_delete_title,
 					R.string.dialog_confirm_delete_miss_all).show();
 			b = true;
+			break;
+		case MENU_ITEM_SV_SWOP:
+			Cursor c = mSCTAdapter.getChild(
+					ExpandableListView.getPackedPositionGroup(info.packedPosition),
+					ExpandableListView.getPackedPositionChild(info.packedPosition));
+			int miss = c.getInt(3);
+			int miss_not_count = c.getInt(5);
+			ContentValues v = new ContentValues();
+			if(miss_not_count>0) {
+				v.put(C.MISS_STUNDEN_NZ, 0);
+				v.put(C.MISS_STUNDEN_Z, miss_not_count);
+			}
+			else {
+				v.put(C.MISS_STUNDEN_Z, 0);
+				v.put(C.MISS_STUNDEN_NZ, miss);
+			}
+			v.put(C.MISS_STUNDEN_E, 0);
+			getContentResolver().update(SchoolTools.buildMissUri(info.id), v,
+					BaseColumns._ID + "=?", new String[] { String.valueOf(info.id) });
+			getContentResolver().notifyChange(mUri, null);
 			break;
 		}
 
