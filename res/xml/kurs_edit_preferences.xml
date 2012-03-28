@@ -7,7 +7,9 @@
 			    android:title="@string/kurs_edit_name"
 			    android:defaultValue="@android:string/untitled"
 			    android:summary="@android:string/untitled" />
-			<Preference
+  </PreferenceCategory>
+  <PreferenceCategory android:title="@string/kurs_anzeige_fehlstunden">
+  			<Preference
 				android:key="startdate"
 				android:title="@string/kurs_start" />
 			<Preference

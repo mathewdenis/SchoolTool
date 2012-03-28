@@ -86,7 +86,7 @@ public class KurseList extends ListActivity {
 		// This is our one standard application action -- inserting a
 		// new course into the list.
 		menu.add(Menu.NONE, MENU_ITEM_ADD, 0, R.string.menu_course_insert)
-				.setShortcut('1', 'i').setIcon(android.R.drawable.ic_menu_add)
+				.setShortcut('1', 'i').setIcon(R.drawable.ic_menu_add)
 				.setIntent(new Intent(Intent.ACTION_INSERT, mUri));
 
 		return super.onCreateOptionsMenu(menu);

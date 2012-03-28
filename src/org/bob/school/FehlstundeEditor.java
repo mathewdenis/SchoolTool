@@ -14,6 +14,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
@@ -22,11 +23,13 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
+import android.provider.BaseColumns;
 import android.text.format.DateFormat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
+import android.widget.Toast;
 
 public class FehlstundeEditor extends PreferenceActivity implements
 		OnDateSetListener, OnPreferenceChangeListener,
@@ -140,13 +143,22 @@ public class FehlstundeEditor extends PreferenceActivity implements
 		values.put(SchoolTools.buildMissColumn(!mCount.isChecked()), 0);
 		values.put(C.MISS_STUNDEN_E, mMissExcused.getValue());
 
-		if(Intent.ACTION_INSERT.equals(getIntent().getAction())) {
-			values.put(C.MISS_SCHUELERID, mUri.getQueryParameter(C.MISS_SCHUELERID));
-			Uri uri = getContentResolver().insert(mUri, values);
-			getIntent().setData(uri);
-			setResult(RESULT_OK, getIntent());
-		} else
-			getContentResolver().update(mUri, values, null, null);
+		try {
+			if (Intent.ACTION_INSERT.equals(getIntent().getAction())) {
+				values.put(C.MISS_SCHUELERID,
+						mUri.getQueryParameter(C.MISS_SCHUELERID));
+				Uri uri = getContentResolver().insert(mUri, values);
+				getIntent().setData(uri);
+				setResult(RESULT_OK, getIntent());
+			} else
+				getContentResolver().update(mUri, values, BaseColumns._ID + "=?", new String[] { mUri.getLastPathSegment() });
+		} catch (SQLiteConstraintException ce) {
+			Toast.makeText(
+					this,
+					getResources().getString(
+							R.string.toast_update_miss_constraint_violation),
+					Toast.LENGTH_LONG).show();
+		}
 
 		setResult(RESULT_OK);
 		finish();
@@ -157,33 +169,6 @@ public class FehlstundeEditor extends PreferenceActivity implements
 		finish();
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(Menu.NONE, MENU_ITEM_DELETE, 0, R.string.menu_miss_delete)
-				.setShortcut('1', 'i')
-				.setIcon(android.R.drawable.ic_menu_delete);
-
-		return super.onCreateOptionsMenu(menu);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case MENU_ITEM_DELETE:
-			AlertDialogs.createOKCancelDialog(this, new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					getContentResolver().delete(mUri, null, null);
-					finish();
-				}
-			}, R.string.dialog_confirm_delete_title,
-					R.string.dialog_confirm_delete_miss).show();
-			break;
-		}
-
-		return super.onOptionsItemSelected(item);
-	}
-
 	private void guiUpdatePrefs(Cursor c) {
 		if (c == null) {
 			c = getContentResolver()
@@ -191,7 +176,7 @@ public class FehlstundeEditor extends PreferenceActivity implements
 							C.CONTENT_COURSE_TYPE), null, null, null, null);
 			c.moveToFirst();
 			String todaysHours = String.valueOf(Math.max(1,
-					CalendarTools.getTodaysHours(c)));
+					CalendarTools.getTodaysHours(c, Calendar.getInstance())));
 			mMiss.setValue(todaysHours);
 			mMiss.setSummary(todaysHours);
 			mCount.setChecked(true);

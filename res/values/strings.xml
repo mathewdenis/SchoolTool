@@ -8,7 +8,9 @@
 	<string name="title_kurs_fehlstunde_list">Kurs-Fehlstunden</string>
 	<string name="title_kurs_edit">Kurseinstellungen bearbeiten</string>
 	<string name="title_fehlstunde_edit">Fehlstunde bearbeiten</string>
+	<string name="title_fehlstunde_overwrite">Fehlstunde überschreiben?</string>
 	<string name="title_kurs_insert">Neuen Kurs einfügen</string>
+	<string name="title_fehlstunde_sv_wechsel">Fehlstunde &#8596; Schul-V.</string>
 	
 	<string name="menu_course_view">Kurs anzeigen</string>
 	<string name="menu_course_edit">Kurseinstellungen</string>
@@ -27,7 +29,8 @@
 
 	<string name="kurs_edit_name">Name des Kurses</string>
 	<string name="kurs_start">Kursbeginn</string>
-	<string name="kurs_end">Kursende</string>
+	<string name="kurs_end">Kursende</string>	
+	<string name="kurs_anzeige_fehlstunden">Anzeigezeitraum der Fehlstunden</string>
 	<string name="kurs_stunden">Stunden des Kurses</string>
 	<string name="sum_wd">Stundenzahl des Kurses an diesem Wochentag</string>
 	<string name="wd_mon">Montag</string>
@@ -38,8 +41,11 @@
 	<string name="miss_caption">Fehlstunden</string>
 	<string name="miss_excused_caption">Fehlstunden entschuldigt</string>
 	<string name="miss_count_caption">Fehlstunden zählen</string>
-	<string name="sum_count">Nicht als Fehlstunden zählen etwa Schulveranstaltungen</string><string name="date_caption">Datum</string>
-	
+	<string name="sum_count">Nicht als Fehlstunden zählen etwa Schulveranstaltungen</string>
+	<string name="date_caption">Datum</string>
+	<string name="sdate_caption">Startdatum</string>
+	<string name="edate_caption">Enddatum</string>
+		
 	<string name="kurs_details">Details</string>
 	<string name="kurs_save">Speichern</string>
 	<string name="kurs_cancel">Abbrechen</string>
@@ -51,9 +57,13 @@
 	<string name="dialog_confirm_delete_miss_all">Sollen alle Fehlstunden des Kurses zu diesem Datum gelöscht werden?</string>
 	<string name="dialog_pupil_add_format">Format: Name1, Vorname1; Name2, Vorname2; ...</string>
 	<string name="dialog_pupil_edit">Format: Name, Vorname</string>
-
+	<string name="dialog_update_miss">Fehlstunde existiert bereits, soll sie durch die eingegegebene überschrieben werden?</string>
 	<string name="toast_pupil_add">Es wurden %1$d Schüler hinzugefügt.</string>
 	<string name="toast_miss_delete">Es wurden %1$d Fehlstundeneinträge gelöscht.</string>
-	<string name="menu_export">Dateiexport</string>
-	
+	<string name="toast_update_miss_constraint_violation">Einfügen fehlgeschlagen: Es wurde ein Datum gewählt, an dem schon
+	    eine Fehlstunden eingetragen ist.</string>
+	<string name="toast_bulk_insert_constraint_violation">Einfügen mehrerer Einträge fehlgeschlagen; wahrscheinlich ist ein Eintrag bereits vorhanden.</string>
+		<string name="menu_export">Dateiexport</string>
+
+	<string name="export_as_file">Datei %1$s wurde erstellt.</string>
 </resources>

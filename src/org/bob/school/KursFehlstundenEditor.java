@@ -1,7 +1,5 @@
 package org.bob.school;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import org.bob.school.Schule.C;
@@ -41,9 +39,6 @@ public class KursFehlstundenEditor extends Activity implements
 	private Spinner mCourseHoursSpinner;
 
 	private EditText mDateEditText;
-	private static final DateFormat mDateFormatter = SimpleDateFormat
-			.getDateInstance(SimpleDateFormat.MEDIUM);
-
 	private ArrayAdapter<String> mHoursAdapter = null;
 
 	private static class MyPupilNameListViewBinder implements
@@ -81,10 +76,14 @@ public class KursFehlstundenEditor extends Activity implements
 
 		setTitle(getTitle() + ": " + mCourseName);
 
+		String queryDate;
+
 		today = Calendar.getInstance();
+		if((queryDate = mUri.getQueryParameter(C.QUERY_MISS_WITH_DATE)) != null)
+			today.setTimeInMillis(Long.valueOf(queryDate));
 
 		mDateEditText = (EditText) findViewById(R.id.miss_edittext);
-		mDateEditText.setText(mDateFormatter.format(today.getTime()));
+		mDateEditText.setText(CalendarTools.MEDIUM_DATE_FORMATTER.format(today.getTime()));
 		mDateEditText.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -101,7 +100,7 @@ public class KursFehlstundenEditor extends Activity implements
 		mHoursAdapter = (ArrayAdapter<String>) mCourseHoursSpinner.getAdapter();
 
 		mCourseHoursSpinner.setSelection(mHoursAdapter.getPosition(String
-				.valueOf(Math.max(1, CalendarTools.getTodaysHours(mCursor)))));
+				.valueOf(Math.max(1, CalendarTools.getTodaysHours(mCursor, today)))));
 
 		// query
 		Uri uri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);
@@ -124,7 +123,7 @@ public class KursFehlstundenEditor extends Activity implements
 	public void onDateSet(DatePicker view, int year, int monthOfYear,
 			int dayOfMonth) {
 		today.set(year, monthOfYear, dayOfMonth);
-		mDateEditText.setText(mDateFormatter.format(today.getTime()));
+		mDateEditText.setText(CalendarTools.MEDIUM_DATE_FORMATTER.format(today.getTime()));
 	}
 
 	// saves the misses

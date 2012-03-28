@@ -18,6 +18,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
+import android.provider.BaseColumns;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -33,7 +34,7 @@ public class KursEditor extends PreferenceActivity implements
 	public static final int STATE_DATE_SETTER_START = 0;
 	public static final int STATE_DATE_SETTER_END = 1;
 
-	private Uri mUri;
+	private Uri mUri; // .../course
 	private int mDate_setter_state;
 
 	private Calendar mEditDate; 
@@ -175,7 +176,7 @@ public class KursEditor extends PreferenceActivity implements
 		for(int i=0; i<5; ++i)
 			values.put(C.KURS_WDAYS[i], mWeekdayLP[i].getValue());
 
-		getContentResolver().update(mUri, values, null, null);
+		getContentResolver().update(mUri, values, BaseColumns._ID + "=?", new String[] { mUri.getLastPathSegment() });
 		setResult(RESULT_OK);
 
 		mDeleteCourse = false;
