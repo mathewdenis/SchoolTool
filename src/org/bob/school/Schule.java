@@ -5,6 +5,44 @@ import android.provider.BaseColumns;
 
 public class Schule {
 	public static final String AUTHORITY = "org.bob.provider.school";
+	/**
+	 * The MIME type of {@link #CONTENT_URI} providing a directory of
+	 * courses.
+	 */
+	public static final String CONTENT_COURSES_TYPE = "vnd.android.cursor.dir/vnd.bob.course";
+
+	/**
+	 * The MIME type of a {@link #CONTENT_URI} of a single course item.
+	 */
+	public static final String CONTENT_COURSE_TYPE = "vnd.android.cursor.item/vnd.bob.course";
+
+	/**
+	 * The MIME type of {@link #CONTENT_URI} providing a directory of
+	 * pupils.
+	 */
+	public static final String CONTENT_PUPILS_TYPE = "vnd.android.cursor.dir/vnd.bob.pupil";
+
+	/**
+	 * The MIME type of {@link #CONTENT_URI} providing a single pupil item.
+	 */
+	public static final String CONTENT_PUPIL_TYPE = "vnd.android.cursor.item/vnd.bob.pupil";
+
+	/**
+	 * The MIME type of {@link #CONTENT_URI} providing a directory of course misses 
+	 */
+	public static final String CONTENT_MISSES_TYPE = "vnd.android.cursor.dir/vnd.bob.miss";
+
+	/**
+	 * The MIME type of {@link #CONTENT_URI} of a single miss for a pupil
+	 */
+	public static final String CONTENT_MISS_TYPE = "vnd.android.cursor.item/vnd.bob.miss";
+
+	/**
+	 * The MIME type of {@link #CONTENT_URI} of a single miss for a pupil
+	 */
+	public static final String CONTENT_COURSE_MISS_TYPE = "vnd.android.cursor.dir/vnd.bob.course_miss";
+
+	public static final String DATE_EXTRA = "date";
 
 	public static final class C implements BaseColumns {
 		/**
@@ -27,43 +65,6 @@ public class Schule {
 		/** The URI-segment identifying a course
 		 */
 		public static final String SETTINGS_SEGMENT = "settings";
-
-		/**
-		 * The MIME type of {@link #CONTENT_URI} providing a directory of
-		 * courses.
-		 */
-		public static final String CONTENT_COURSES_TYPE = "vnd.android.cursor.dir/vnd.bob.course";
-
-		/**
-		 * The MIME type of a {@link #CONTENT_URI} of a single course item.
-		 */
-		public static final String CONTENT_COURSE_TYPE = "vnd.android.cursor.item/vnd.bob.course";
-
-		/**
-		 * The MIME type of {@link #CONTENT_URI} providing a directory of
-		 * pupils.
-		 */
-		public static final String CONTENT_PUPILS_TYPE = "vnd.android.cursor.dir/vnd.bob.pupil";
-
-		/**
-		 * The MIME type of {@link #CONTENT_URI} providing a single pupil item.
-		 */
-		public static final String CONTENT_PUPIL_TYPE = "vnd.android.cursor.item/vnd.bob.pupil";
-
-		/**
-		 * The MIME type of {@link #CONTENT_URI} providing a directory of course misses 
-		 */
-		public static final String CONTENT_MISSES_TYPE = "vnd.android.cursor.dir/vnd.bob.miss";
-
-		/**
-		 * The MIME type of {@link #CONTENT_URI} of a single miss for a pupil
-		 */
-		public static final String CONTENT_MISS_TYPE = "vnd.android.cursor.item/vnd.bob.miss";
-
-		/**
-		 * The MIME type of {@link #CONTENT_URI} of a single miss for a pupil
-		 */
-		public static final String CONTENT_COURSE_MISS_TYPE = "vnd.android.cursor.dir/vnd.bob.course_miss";
 
 		/** This query parameter enables a really dirty hack to get a cursor
 		 *  with an _id column for each distinct date in the miss list.

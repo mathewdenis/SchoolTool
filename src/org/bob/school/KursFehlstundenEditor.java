@@ -35,7 +35,6 @@ public class KursFehlstundenEditor extends Activity implements
 	private String mCourseName;
 	// private DatePicker mDatePicker;
 	private ListView mPupilsList;
-	private int mDayOfWeek;
 	private Spinner mCourseHoursSpinner;
 
 	private EditText mDateEditText;
@@ -76,11 +75,12 @@ public class KursFehlstundenEditor extends Activity implements
 
 		setTitle(getTitle() + ": " + mCourseName);
 
-		String queryDate;
-
 		today = Calendar.getInstance();
-		if((queryDate = mUri.getQueryParameter(C.QUERY_MISS_WITH_DATE)) != null)
-			today.setTimeInMillis(Long.valueOf(queryDate));
+
+		// check whether a specific date is given in the intent
+		Bundle extras = getIntent().getExtras();
+		if(extras.containsKey(Schule.DATE_EXTRA))
+			today.setTimeInMillis(extras.getLong(Schule.DATE_EXTRA));
 
 		mDateEditText = (EditText) findViewById(R.id.miss_edittext);
 		mDateEditText.setText(CalendarTools.MEDIUM_DATE_FORMATTER.format(today.getTime()));
