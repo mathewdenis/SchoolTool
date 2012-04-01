@@ -394,11 +394,10 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 			Uri c_uri = Uri
 					.withAppendedPath(C.CONTENT_URI, C.COURSE_SEGMENT)
 					.buildUpon()
-					.appendPath(mUri.getPathSegments().get(1))
-					.appendQueryParameter(C.QUERY_MISS_WITH_DATE,
-							mSCTAdapter.getGroup(pgroup).getString(1)).build();
+					.appendPath(mUri.getPathSegments().get(1)).build();
 
 			Intent intent = new Intent(KursFehlstundenEditor.ACTION_ADD_COURSE_MISSES, c_uri);
+			intent.putExtra(Schule.DATE_EXTRA, mSCTAdapter.getGroup(pgroup).getLong(1));
 			startActivity(intent);
 			break;
 		}

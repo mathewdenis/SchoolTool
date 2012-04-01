@@ -3,15 +3,12 @@ package org.bob.school;
 import java.util.Calendar;
 
 import org.bob.school.Schule.C;
-import org.bob.school.tools.AlertDialogs;
 import org.bob.school.tools.CalendarTools;
 import org.bob.school.tools.SchoolTools;
 
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.ContentValues;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteConstraintException;
@@ -25,8 +22,6 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.provider.BaseColumns;
 import android.text.format.DateFormat;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.Toast;
@@ -34,13 +29,6 @@ import android.widget.Toast;
 public class FehlstundeEditor extends PreferenceActivity implements
 		OnDateSetListener, OnPreferenceChangeListener,
 		OnPreferenceClickListener {
-
-	/**
-	 * Special intent action meaning "edit miss"
-	 */
-//	public static final String ACTION_ADD_MISS = "org.bob.school.action.ADD_MISS";
-
-	private static final int MENU_ITEM_DELETE = Menu.FIRST;
 
 	// data: .../miss/# (MISS_ID)  (ACTION_EDIT)
 	//       .../miss (MISS)  (ACTION_INSERT)
@@ -173,7 +161,7 @@ public class FehlstundeEditor extends PreferenceActivity implements
 		if (c == null) {
 			c = getContentResolver()
 					.query((Uri) getIntent().getParcelableExtra(
-							C.CONTENT_COURSE_TYPE), null, null, null, null);
+							Schule.CONTENT_COURSE_TYPE), null, null, null, null);
 			c.moveToFirst();
 			String todaysHours = String.valueOf(Math.max(1,
 					CalendarTools.getTodaysHours(c, Calendar.getInstance())));

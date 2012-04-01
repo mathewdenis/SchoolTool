@@ -340,7 +340,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 					.appendQueryParameter(C.MISS_SCHUELERID, String.valueOf(info.id)).build();
 			Intent intent = new Intent(Intent.ACTION_INSERT, uri);
 			// put the course number into the intent
-			intent.putExtra(C.CONTENT_COURSE_TYPE, mUri);
+			intent.putExtra(Schule.CONTENT_COURSE_TYPE, mUri);
 
 		    // columns are: _id[0], nachname[1], vorname[2], miss_sum[3], miss_ex_sum[4], miss_ncount_sum[5]
 			menuHeader = c.getString(1) + ", " + c.getString(2);

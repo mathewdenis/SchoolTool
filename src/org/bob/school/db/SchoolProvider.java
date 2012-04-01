@@ -524,25 +524,25 @@ public class SchoolProvider extends ContentProvider {
 	public String getType(Uri uri) {
 		switch (mUriMatcher.match(uri)) {
 		case COURSE:
-			return C.CONTENT_COURSES_TYPE;
+			return Schule.CONTENT_COURSES_TYPE;
 
 		case COURSE_ID:
-			return C.CONTENT_COURSE_TYPE;
+			return Schule.CONTENT_COURSE_TYPE;
 
 		case COURSE_PUPIL:
-			return C.CONTENT_PUPILS_TYPE;
+			return Schule.CONTENT_PUPILS_TYPE;
 
 		case PUPIL_ID:
-			return C.CONTENT_PUPIL_TYPE;
+			return Schule.CONTENT_PUPIL_TYPE;
 
 		case MISS:
-			return C.CONTENT_MISSES_TYPE;
+			return Schule.CONTENT_MISSES_TYPE;
 
 		case MISS_ID:
-			return C.CONTENT_MISS_TYPE;
+			return Schule.CONTENT_MISS_TYPE;
 
 		case COURSE_MISS:
-			return C.CONTENT_COURSE_MISS_TYPE;
+			return Schule.CONTENT_COURSE_MISS_TYPE;
 
 		default:
 			throw new IllegalArgumentException(
