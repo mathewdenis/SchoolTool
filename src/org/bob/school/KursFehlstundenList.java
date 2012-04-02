@@ -353,7 +353,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 			getContentResolver().update(SchoolTools.buildMissUri(info.id), v,
 					BaseColumns._ID + "=?", new String[] { String.valueOf(info.id) });
 			b = true;
-			// getContentResolver().notifyChange(mUri, null);
+			getContentResolver().notifyChange(mUri, null);
 			break;
 
 		// parent menu items
