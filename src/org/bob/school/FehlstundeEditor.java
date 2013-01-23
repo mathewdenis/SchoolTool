@@ -159,8 +159,8 @@ public class FehlstundeEditor extends PreferenceActivity implements
 
 	private void guiUpdatePrefs(Cursor c) {
 		if (c == null) {
-			Bundle b = getIntent().getExtras();
 
+			Bundle b = getIntent().getExtras();
 			String todaysHours = String.valueOf(Math.max(1,
 					CalendarTools.getTodaysHours(b, Calendar.getInstance())));
 
