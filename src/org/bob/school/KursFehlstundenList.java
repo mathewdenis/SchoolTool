@@ -13,6 +13,7 @@ import org.bob.school.tools.SchoolTools;
 import android.app.Activity;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -52,7 +53,6 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 	private static final int MENU_ITEM_ADD_MISSES = Menu.FIRST + 5;
 	
 	private Uri mUri; // .../course/#/miss (COURSE_MISS)
-	private String mCourseId;
 	private String mCourseName;
 	private Calendar mSDatum, mEDatum;
 	private int[] mWeekHours = new int[5];
@@ -71,7 +71,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 
 		@Override
 		public Cursor getChildrenCursor(Cursor groupCursor) {
-			Cursor c = mActivity.managedQuery(mUri, new String[] {
+			Cursor c = new CursorLoader(mActivity, mUri, new String[] {
 					C.MISS_TABLE + "." + C._ID,
 					C.SCHUELER_NACHNAME,
 					C.SCHUELER_VORNAME, C.MISS_STUNDEN_Z,
@@ -80,7 +80,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 					C.MISS_DATUM + "=?",
 					new String[] { groupCursor.getString(groupCursor
 							.getColumnIndex(C.MISS_DATUM)) },
-					DEFAULT_SORT_ORDER_NAME);
+					DEFAULT_SORT_ORDER_NAME).loadInBackground();
 			c.setNotificationUri(mActivity.getContentResolver(), mUri);
 			return c;
 		}
@@ -127,8 +127,8 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
 
-		Cursor c;
 		mUri = getIntent().getData();
+		Bundle b = getIntent().getExtras();
 
 		/* Important: It might seem more reasonable to use an ExpandableListActivity
 		 * all the way to simplify some coding.
@@ -147,39 +147,31 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		 */
 		mExpListView = new ExpandableListView(this);
 		mExpListView.setId(R.id.expandableList);
-		mExpListView.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.FILL_PARENT));
+		mExpListView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
 		setContentView(mExpListView);
 
 		// append course name to activity title
-		Uri uri = Uri.withAppendedPath(C.CONTENT_URI,
-				C.COURSE_SEGMENT);
-		mCourseId = mUri.getPathSegments().get(1);
-		uri = Uri.withAppendedPath(uri, mCourseId);
-		c = getContentResolver().query(uri, null, null, null, null);
-		c.moveToFirst();
-		mCourseName = c.getString(c.getColumnIndex(C.KURS_NAME));
-		(mSDatum = Calendar.getInstance()).setTimeInMillis(c.getLong(c.getColumnIndex(C.KURS_SDATE)));
-		(mEDatum = Calendar.getInstance()).setTimeInMillis(c.getLong(c.getColumnIndex(C.KURS_EDATE)));
+		
+		mCourseName = b.getString(Schule.PREFIX + C.KURS_NAME);
+		(mSDatum = Calendar.getInstance()).setTimeInMillis(b.getLong(Schule.PREFIX + C.KURS_SDATE));
+		(mEDatum = Calendar.getInstance()).setTimeInMillis(b.getLong(Schule.PREFIX + C.KURS_EDATE));
 
 		for (int i = 0; i < 5; ++i)
-			mWeekHours[i] = c.getInt(c.getColumnIndex(C.KURS_WDAYS[i]));
-
-		c.close();
+			mWeekHours[i] = b.getInt(Schule.PREFIX + C.KURS_WDAYS[i]);
 
 		registerForContextMenu(mExpListView);
 		mExpListView.setOnChildClickListener(this);
 
 		// dirty hack's projection is { max(miss._id), miss.datum, miss_sum, miss_ex_sum }
-
-		c = managedQuery(
+		Cursor c = new CursorLoader(this,
 				mUri.buildUpon()
 						.appendQueryParameter(
 								C.QUERY_DISTINCT_DATES_WITH_ID_HACK, "1")
 						.build(), null, C.MISS_DATUM + " between ? and ?",
 				new String[] { String.valueOf(mSDatum.getTimeInMillis()),
 						String.valueOf(mEDatum.getTimeInMillis()) },
-				DEFAULT_SORT_ORDER_DATE);
+				DEFAULT_SORT_ORDER_DATE).loadInBackground();
 		c.setNotificationUri(getContentResolver(), mUri);
 
 		// set the expandable list adapter
@@ -230,15 +222,16 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		Uri uri = Uri.withAppendedPath(Uri.withAppendedPath(
 				C.CONTENT_URI, C.COURSE_SEGMENT), mUri
 				.getPathSegments().get(1));
+		Intent i = new Intent(KursFehlstundenEditor.ACTION_ADD_COURSE_MISSES,
+				uri);
+		i.putExtras(getIntent().getExtras());
 
 		menu.add(Menu.NONE, MENU_ITEM_ADD_MISSES, 0,
 				R.string.menu_misses_insert)
 				.setShortcut('1', 'a')
 				.setIcon(R.drawable.ic_menu_close_clear_cancel)
-				.setIntent(
-						new Intent(
-								KursFehlstundenEditor.ACTION_ADD_COURSE_MISSES,
-								uri));
+				.setIntent(i);
+						
 		menu.add(Menu.NONE, MENU_ITEM_EXPORT, 0, R.string.menu_export)
 				.setIcon(R.drawable.ic_menu_export).setShortcut('2', 'x');
 
@@ -365,22 +358,21 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 						public void onClick(DialogInterface dialog, int which) {
 							int pgroup = ExpandableListView
 									.getPackedPositionGroup(info.packedPosition);
-							int childCount = mExpListView.getExpandableListAdapter()
-									.getChildrenCount(pgroup);
-							for (int i = 0; i < childCount; ++i)
-								getContentResolver()
-										.delete(ContentUris.withAppendedId(uri,
-												mExpListView.getExpandableListAdapter()
-														.getChildId(pgroup, i)),
-												null, null);
+							Cursor c = (Cursor) mExpListView.getExpandableListAdapter().getGroup(pgroup);
+							int count = getContentResolver().delete(mUri, null,
+									new String[] { String.valueOf(c.getLong(1)),  // date
+										mUri.getPathSegments().get(1) // course-id
+									});
 
 							// see above for explanation
 							getContentResolver().notifyChange(mUri, null);
 
 							Toast.makeText(
 									KursFehlstundenList.this,
-									getResources().getString(R.string.toast_miss_delete,
-															 childCount),
+									(count == 1 ? getResources().getString(
+											R.string.toast_miss_delete_sg,
+											count) : getResources().getString(
+											R.string.toast_miss_delete, count)),
 									Toast.LENGTH_SHORT).show();
 						}
 					}, R.string.dialog_confirm_delete_title,

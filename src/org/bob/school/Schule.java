@@ -4,7 +4,9 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 
 public class Schule {
-	public static final String AUTHORITY = "org.bob.provider.school";
+	public static final String PREFIX = "org.bob.school.";
+	
+	public static final String AUTHORITY = PREFIX + "provider";
 	/**
 	 * The MIME type of {@link #CONTENT_URI} providing a directory of
 	 * courses.
@@ -42,6 +44,11 @@ public class Schule {
 	 */
 	public static final String CONTENT_COURSE_MISS_TYPE = "vnd.android.cursor.dir/vnd.bob.course_miss";
 
+	/**
+	 * The MIME type of {@link #CONTENT_URI} of a single miss for a pupil
+	 */
+	public static final String CONTENT_COURSE_CALENDAR_TYPE = "vnd.android.cursor.item/vnd.bob.course_calendar";
+
 	public static final String DATE_EXTRA = "date";
 
 	public static final class C implements BaseColumns {
@@ -62,9 +69,11 @@ public class Schule {
 		 */
 		public static final String MISS_SEGMENT = "miss";
 
-		/** The URI-segment identifying a course
+		/** The URI-segment identifying the settings
 		 */
 		public static final String SETTINGS_SEGMENT = "settings";
+
+		public static final String CALENDAR_SEGMENT = "calendar";
 
 		/** This query parameter enables a really dirty hack to get a cursor
 		 *  with an _id column for each distinct date in the miss list.
@@ -116,6 +125,11 @@ public class Schule {
 		public static final String SETTINGS_VALUE_TEXT = "wert_text";
 		public static final String SETTINGS_VALUE_INT = "wert_int";
 
+		public static final String KURS_TERMINE_TABLE = "kurs_termine";
+		public static final String KURS_TERMINE_KURSID = "kursid";
+		public static final String KURS_TERMINE_DATE = "termin";
+		public static final String KURS_TERMINE_STUNDEN = "stunden";
+
 		public static final String ENDDATE_SUM_MISS_SETTING = "enddate_sum_miss";
 		public static final String STARTDATE_SUM_MISS_SETTING = "startdatum_sum_miss";
 
@@ -124,6 +138,5 @@ public class Schule {
 		public static final String MISS_SUM_STUNDEN_Z = "sum_std_z";
 		public static final String MISS_SUM_STUNDEN_NZ = "sum_std_nz";
 		public static final String MISS_SUM_STUNDEN_E = "sum_std_e";
-
 	}
 }

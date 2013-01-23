@@ -17,19 +17,17 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
-import android.provider.BaseColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 public class SchoolProvider extends ContentProvider {
 	public static final String DATABASE_NAME = "schooltool.db";
-	public static final int DATABASE_VERSION = 3;
+	public static final int DATABASE_VERSION = 4;
 	public static final String TAG = "SchoolProvider";
 
 	private static final int COURSE = 1;
@@ -40,66 +38,9 @@ public class SchoolProvider extends ContentProvider {
 	private static final int MISS_ID = 6;
 	private static final int COURSE_MISS = 7;
 	private static final int SETTINGS = 8;
+	private static final int COURSE_CALENDAR = 9;
 
 	// Table and View create statements
-	private static final String SCHUELER_TABLE_CREATE = "create table "
-			+ C.SCHUELER_TABLE + " (" + BaseColumns._ID
-			+ " integer primary key autoincrement, " + C.SCHUELER_NACHNAME
-			+ " text not null, " + C.SCHUELER_VORNAME + " text not null,"
-			+ C.SCHUELER_KURSID + " integer not null," + "foreign key ("
-			+ C.SCHUELER_KURSID + ") references " + C.KURS_TABLE + "("
-			+ BaseColumns._ID + ") ON DELETE CASCADE)";
-
-	private static final String KURS_TABLE_CREATE = "create table "
-			+ C.KURS_TABLE
-			+ " ("
-			+ BaseColumns._ID
-			+ " integer primary key autoincrement, "
-			+ C.KURS_NAME
-			+ " text not null, "
-			+ C.KURS_SDATE
-			+ " integer, "
-			+ C.KURS_EDATE
-			+ " integer, "
-			+ StringTools.arrayToString(C.KURS_WDAYS, ", ", null,
-					" integer not null") + ")";
-
-	private static final String MISS_TABLE_CREATE = "create table "
-			+ C.MISS_TABLE + " (" + BaseColumns._ID
-			+ " integer primary key autoincrement, " + C.MISS_DATUM
-			+ " integer not null, " + C.MISS_STUNDEN_Z + " integer not null, "
-			+ C.MISS_STUNDEN_NZ + " integer not null, " + C.MISS_STUNDEN_E
-			+ " integer not null, " + C.MISS_SCHUELERID + " integer not null, "
-			+ C.MISS_GRUND + " integer not null default 0, " + C.MISS_BEMERKUNG
-			+ " text, " + "foreign key (" + C.MISS_SCHUELERID + ") references "
-			+ C.SCHUELER_TABLE + "(" + BaseColumns._ID
-			+ ") ON DELETE CASCADE, " + "unique (" + C.MISS_DATUM + ", "
-			+ C.MISS_SCHUELERID + ", " + C.MISS_GRUND + "))";
-
-	private static final String MISS_VIEW_CREATE = "create view "
-			+ C.PUPIL_MISS_VIEW + " as select " + C.SCHUELER_TABLE + "."
-			+ BaseColumns._ID + " AS " + BaseColumns._ID + "," + "sum("
-			+ C.MISS_STUNDEN_Z + ") AS " + C.MISS_SUM_STUNDEN_Z + "," + "sum("
-			+ C.MISS_STUNDEN_NZ + ") AS " + C.MISS_SUM_STUNDEN_NZ + ","
-			+ "sum(" + C.MISS_STUNDEN_E + ") AS " + C.MISS_SUM_STUNDEN_E
-			+ " from " + C.SCHUELER_TABLE + " join " + C.MISS_TABLE + " on ("
-			+ C.SCHUELER_TABLE + "." + BaseColumns._ID + "="
-			+ C.MISS_SCHUELERID + ")" + " where " + C.MISS_DATUM
-			+ " between (select " + C.SETTINGS_VALUE_INT + " from "
-			+ C.SETTINGS_TABLE + " where " + C.SETTINGS_NAME + "='"
-			+ C.STARTDATE_SUM_MISS_SETTING + "') and "
-			+ "coalesce((select " + C.SETTINGS_VALUE_INT + " from "
-			+ C.SETTINGS_TABLE + " where " + C.SETTINGS_NAME + "='"
-			+ C.ENDDATE_SUM_MISS_SETTING + "'), (select max(" + C.MISS_DATUM
-			+ ") from " + C.MISS_TABLE + "))" + " group by " + C.SCHUELER_TABLE
-			+ "." + BaseColumns._ID + " order by " + C.MISS_SUM_STUNDEN_Z
-			+ " desc, " + C.MISS_SUM_STUNDEN_E + " desc";
-
-	private static final String SETTINGS_TABLE_CREATE = "create table "
-			+ C.SETTINGS_TABLE + " (" + BaseColumns._ID
-			+ " integer primary key autoincrement, " + C.SETTINGS_NAME
-			+ " text, " + C.SETTINGS_VALUE_INT + " integer, "
-			+ C.SETTINGS_VALUE_TEXT + " text)";			
 
 	private SQLiteOpenHelper db_helper;
 	private static final UriMatcher mUriMatcher;
@@ -126,6 +67,9 @@ public class SchoolProvider extends ContentProvider {
 		b2 = new StringBuilder(b).append("/").append(C.MISS_SEGMENT);
 		// .../course/#/miss
 		mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), COURSE_MISS);
+		b2 = new StringBuilder(b).append("/").append(C.CALENDAR_SEGMENT);
+		// .../course/#/calendar
+		mUriMatcher.addURI(Schule.AUTHORITY, b2.toString(), COURSE_CALENDAR);
 
 		b.append("/").append(C.PUPIL_SEGMENT);
 		// .../course/#/pupil
@@ -145,66 +89,28 @@ public class SchoolProvider extends ContentProvider {
 				Log.i(TAG, "Upgrading DB from version " + oldVersion + " to "
 						+ newVersion);
 				if (oldVersion < 2) {
-					upgrade1(db);
+					Updater.upgrade1(db);
 				}
 				if(oldVersion < 3) {
-					upgrade2(db);
+					Updater.upgrade2(db);
 				}
-				// Log.w(TAG, "Upgrading database from version " + oldVersion +
-				// " to "
-				// + newVersion + ", which will destroy all old data");
-				// db.execSQL("DROP TABLE IF EXISTS " + C.PUPIL_MISS_VIEW);
-				// db.execSQL("DROP TABLE IF EXISTS " + C.MISS_TABLE);
-				// db.execSQL("DROP TABLE IF EXISTS " + C.SCHUELER_TABLE);
-				// db.execSQL("DROP TABLE IF EXISTS " + C.KURS_TABLE);
-				// onCreate(db);
-				// }
-			}
-
-			private void upgrade1(SQLiteDatabase db) {
-				db.beginTransaction();
-				db.execSQL("ALTER TABLE versaeumnis ADD grund integer not null default 0");
-				db.execSQL("ALTER TABLE versaeumnis ADD bemerkung text");
-				try {
-					db.execSQL("CREATE UNIQUE INDEX datum_schueler_grund_uq ON"
-							+ " versaeumnis (datum, schuelerid, grund)");
-					db.setTransactionSuccessful();
-				} catch (SQLiteConstraintException e) {
-					Log.e(TAG, e.getMessage());
-				}
-				db.endTransaction();
-			}
-
-			private void upgrade2(SQLiteDatabase db) {
-				db.beginTransaction();
-				try {
-					db.execSQL(SETTINGS_TABLE_CREATE);
-					db.execSQL("INSERT INTO " + C.SETTINGS_TABLE + "("
-							+ C.SETTINGS_NAME + "," + C.SETTINGS_VALUE_INT
-							+ ")" + " VALUES " + "('"
-							+ C.STARTDATE_SUM_MISS_SETTING + "'," + "0)");
-					db.execSQL("INSERT INTO " + C.SETTINGS_TABLE + "("
-							+ C.SETTINGS_NAME + "," + C.SETTINGS_VALUE_INT
-							+ ")" + " VALUES " + "('"
-							+ C.ENDDATE_SUM_MISS_SETTING + "'," + "null)");
-
-					db.execSQL("DROP VIEW " + C.PUPIL_MISS_VIEW);
-					db.execSQL(MISS_VIEW_CREATE);
-					db.setTransactionSuccessful();
-				} catch (SQLiteException e) {
-					Log.e(TAG, e.getMessage());
-				} finally {
-					db.endTransaction();
+				if(oldVersion < 4) {
+					Updater.upgrade3(db);
 				}
 			}
-
+			
 			@Override
 			public void onCreate(SQLiteDatabase db) {
 				db.execSQL("PRAGMA foreign_keys=ON;");
-				db.execSQL(KURS_TABLE_CREATE);
-				db.execSQL(SCHUELER_TABLE_CREATE);
-				db.execSQL(MISS_TABLE_CREATE);
-				db.execSQL(MISS_VIEW_CREATE);
+				db.execSQL(Updater.KURS_TABLE_CREATE);
+				db.execSQL(Updater.SCHUELER_TABLE_CREATE);
+				db.execSQL(Updater.MISS_TABLE_CREATE);
+				// version 3
+				db.execSQL(Updater.SETTINGS_TABLE_CREATE);
+				Updater.initialSettingInsertions(db);
+				db.execSQL(Updater.MISS_VIEW_CREATE);
+				// version 4
+				db.execSQL(Updater.COURSE_DATES_CREATE);
 			}
 
 			@Override
@@ -309,7 +215,7 @@ public class SchoolProvider extends ContentProvider {
 		default:
 			throw new IllegalArgumentException("SchoolProvider.query: Unknown URI " + uri);
 		}
-		Log.d(TAG, qb.buildQuery(projection, selection, selectionArgs, groupBy, null, sortOrder, null));
+		Log.d(TAG, qb.buildQuery(projection, selection, groupBy, null, sortOrder, null));
 
 		return qb.query(db, projection, selection, selectionArgs, groupBy, null, sortOrder);
 	}
@@ -348,8 +254,6 @@ public class SchoolProvider extends ContentProvider {
 		else
 			values = new ContentValues();
 
-		Long now = Long.valueOf(System.currentTimeMillis());
-
 		switch (mUriMatcher.match(uri)) {
 		case COURSE:
 			tableName = C.KURS_TABLE;
@@ -358,11 +262,6 @@ public class SchoolProvider extends ContentProvider {
 						C.KURS_NAME,
 						Resources.getSystem().getString(
 								android.R.string.untitled));
-			if (!values.containsKey(C.KURS_SDATE))
-				values.put(C.KURS_SDATE, now);
-			if (!values.containsKey(C.KURS_EDATE))
-				// now + half a year
-				values.put(C.KURS_EDATE, now + 15552000000L);
 			for (String s : C.KURS_WDAYS)
 				if (!values.containsKey(s))
 					values.put(s, 0);
@@ -499,7 +398,9 @@ public class SchoolProvider extends ContentProvider {
 		SQLiteDatabase db = db_helper.getWritableDatabase();
 		int count;
 		String tableName;
-		String id = uri.getLastPathSegment();
+		selection = C._ID + "=" + uri.getLastPathSegment()
+				+ (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : "");
+
 		switch (mUriMatcher.match(uri)) {
 		case COURSE_ID:
 			tableName = C.KURS_TABLE;
@@ -510,12 +411,23 @@ public class SchoolProvider extends ContentProvider {
 		case MISS_ID:
 			tableName = C.MISS_TABLE;
 			break;
+		case COURSE_MISS:
+			tableName = C.MISS_TABLE;
+			selection = C.MISS_DATUM + "= ? AND " +
+					C.MISS_SCHUELERID + " IN (SELECT " + C._ID + " FROM " +
+					C.SCHUELER_TABLE + " WHERE " +  C.SCHUELER_KURSID + "= ?)";
+			break;
 		default:
 			throw new IllegalArgumentException(
 					"SchoolProvider.delete: Unknown or unsupported URI " + uri);
 		}
-		count = db.delete(tableName, C._ID + "=" + id
-					+ (!TextUtils.isEmpty(selection) ? " AND (" + selection + ')' : ""), selectionArgs);
+
+		Log.d(TAG,
+				"DELETE FROM  " + tableName + " WHERE " + selection
+						+ " WITH ARGUMENTS ["
+						+ StringTools.arrayToString(selectionArgs, ",") + "]");
+		count = db.delete(tableName, selection, selectionArgs);
+
 		getContext().getContentResolver().notifyChange(uri, null);
 		return count;
 	}
@@ -543,6 +455,9 @@ public class SchoolProvider extends ContentProvider {
 
 		case COURSE_MISS:
 			return Schule.CONTENT_COURSE_MISS_TYPE;
+
+		case COURSE_CALENDAR:
+			return Schule.CONTENT_COURSE_CALENDAR_TYPE;
 
 		default:
 			throw new IllegalArgumentException(

@@ -8,6 +8,7 @@ import org.bob.school.tools.CalendarTools;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,11 +29,10 @@ public class KursFehlstundenEditor extends Activity implements
 	 * Special intent action meaning "add misses for a course"
 	 */
 	public static final String ACTION_ADD_COURSE_MISSES = "org.bob.school.action.ADD_COURSE_MISSES";
+	public static final String ACTION_EDIT_COURSE_MISSES = "org.bob.school.action.EDIT_COURSE_MISSES";
 
 	private Uri mUri;         // data: .../course/# (COURSE_ID)
-	private Cursor mCursor;
 	private Calendar today;
-	private String mCourseName;
 	// private DatePicker mDatePicker;
 	private ListView mPupilsList;
 	private Spinner mCourseHoursSpinner;
@@ -67,21 +67,16 @@ public class KursFehlstundenEditor extends Activity implements
 
 		setContentView(R.layout.add_course_miss_layout);
 
-		// get course information
-		mCursor = managedQuery(mUri, null, null, null, null);
-		mCursor.moveToFirst();
-		mCourseName = mCursor.getString(mCursor
-				.getColumnIndex(C.KURS_NAME));
-
-		setTitle(getTitle() + ": " + mCourseName);
-
 		today = Calendar.getInstance();
 
 		// check whether a specific date is given in the intent
+		// get course information
 		Bundle extras = getIntent().getExtras();
-		if(extras.containsKey(Schule.DATE_EXTRA))
+		if(getIntent().getAction().equals(ACTION_EDIT_COURSE_MISSES))
 			today.setTimeInMillis(extras.getLong(Schule.DATE_EXTRA));
+		CalendarTools.resetTime(today);
 
+		setTitle(getTitle() + ": " + extras.getString(Schule.PREFIX + C.KURS_NAME));
 		mDateEditText = (EditText) findViewById(R.id.miss_edittext);
 		mDateEditText.setText(CalendarTools.MEDIUM_DATE_FORMATTER.format(today.getTime()));
 		mDateEditText.setOnClickListener(new OnClickListener() {
@@ -100,19 +95,21 @@ public class KursFehlstundenEditor extends Activity implements
 		mHoursAdapter = (ArrayAdapter<String>) mCourseHoursSpinner.getAdapter();
 
 		mCourseHoursSpinner.setSelection(mHoursAdapter.getPosition(String
-				.valueOf(Math.max(1, CalendarTools.getTodaysHours(mCursor, today)))));
+				.valueOf(Math.max(1, CalendarTools.getTodaysHours(extras, today)))));
 
 		// query
 		Uri uri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);
-		Cursor c = managedQuery(uri, new String[] { C._ID,
+		
+		Cursor c = new CursorLoader(this, uri, new String[] { C._ID,
 				C.SCHUELER_NACHNAME, C.SCHUELER_VORNAME },
-				null, null, SchuelerFehlstundenList.SORT_ORDER_NAME);
+				null, null, SchuelerFehlstundenList.SORT_ORDER_NAME).loadInBackground();
 
 		mPupilsList = (ListView) findViewById(R.id.pupils_list);
+		
 		SimpleCursorAdapter sca = new SimpleCursorAdapter(this,
 				android.R.layout.simple_list_item_multiple_choice, c,
 				new String[] { C.SCHUELER_NACHNAME },
-				new int[] { android.R.id.text1 });
+				new int[] { android.R.id.text1 }, 0);
 		sca.setViewBinder(new MyPupilNameListViewBinder());
 		mPupilsList.setAdapter(sca);
 		mPupilsList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
@@ -128,9 +125,16 @@ public class KursFehlstundenEditor extends Activity implements
 
 	// saves the misses
 	public void okClicked(View v) {
-		long[] checkedPupils = mPupilsList.getCheckItemIds();
+		long[] checkedPupils = mPupilsList.getCheckedItemIds();
 
-		Uri uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT);
+		Uri uri = Uri.withAppendedPath(mUri, C.MISS_SEGMENT);
+		if(getIntent().getAction().equals(ACTION_EDIT_COURSE_MISSES)) {
+			// delete entries for specific date
+			getContentResolver().delete(uri, null, new String[] { String.valueOf(today.getTimeInMillis()),
+					mUri.getLastPathSegment() });
+		}
+
+		uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT);
 		ContentValues[] values = new ContentValues[checkedPupils.length];
 		int i = 0;
 		for(long l : checkedPupils) {

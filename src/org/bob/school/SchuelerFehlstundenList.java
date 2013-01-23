@@ -57,7 +57,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
     // Context menu items for group elements, options menu
     private static final int MENU_ITEM_ADD_PUPIL = Menu.FIRST + 10;
     private static final int MENU_ITEM_ADD_MISS = Menu.FIRST + 11;
-    private static final int MENU_ITEM_EDIT_COURSE = Menu.FIRST + 12;
+//	private static final int MENU_ITEM_EDIT_COURSE = Menu.FIRST + 12;
     private static final int MENU_ITEM_EDIT_PUPIL = Menu.FIRST + 13;
     private static final int MENU_ITEM_DELETE_COURSE = Menu.FIRST + 14;
     private static final int MENU_ITEM_DELETE_PUPIL = Menu.FIRST + 15;
@@ -128,16 +128,13 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 		super.onCreate(savedInstanceState);
 
 		mUri = getIntent().getData();
+		Bundle b = getIntent().getExtras();
 		mWorkingUri = Uri.withAppendedPath(mUri, C.PUPIL_SEGMENT);
 
 		// get course data
-		Cursor c = getContentResolver().query(mUri,
-				new String[] { C.KURS_NAME, C.KURS_SDATE, C.KURS_EDATE }, null, null, null);
-		c.moveToFirst();
-		mTitle = c.getString(c.getColumnIndex(C.KURS_NAME));
-		(mSDatum = Calendar.getInstance()).setTimeInMillis(c.getLong(c.getColumnIndex(C.KURS_SDATE)));
-		(mEDatum = Calendar.getInstance()).setTimeInMillis(c.getLong(c.getColumnIndex(C.KURS_EDATE)));
-		c.close();
+		mTitle = b.getString(Schule.PREFIX + C.KURS_NAME);
+		(mSDatum = Calendar.getInstance()).setTimeInMillis(b.getLong(Schule.PREFIX + C.KURS_SDATE));
+		(mEDatum = Calendar.getInstance()).setTimeInMillis(b.getLong(Schule.PREFIX + C.KURS_EDATE));
 
 		registerForContextMenu(getExpandableListView());
 
@@ -237,10 +234,10 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add(Menu.NONE, MENU_ITEM_ADD_PUPIL, 0, R.string.menu_pupil_insert)
 				.setShortcut('1', 'i').setIcon(R.drawable.ic_menu_add);
-		menu.add(Menu.NONE, MENU_ITEM_EDIT_COURSE, 0, R.string.menu_course_edit)
+/*		menu.add(Menu.NONE, MENU_ITEM_EDIT_COURSE, 0, R.string.menu_course_edit)
 				.setShortcut('2', 'e').setIcon(R.drawable.ic_menu_edit)
 				.setIntent(new Intent(Intent.ACTION_EDIT, mUri));
-		menu.add(Menu.NONE, MENU_ITEM_DELETE_COURSE, 0,
+*/		menu.add(Menu.NONE, MENU_ITEM_DELETE_COURSE, 0,
 				R.string.menu_course_delete).setShortcut('3', 'd')
 				.setIcon(R.drawable.ic_menu_delete);
 		menu.add(Menu.NONE, MENU_SORT_LIST, 0, R.string.menu_sort_by_size)
@@ -254,7 +251,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		MenuItem soi = menu.getItem(3);
+		MenuItem soi = menu.getItem(2);
 
 		if(mSortOrderCode==0) {
 			soi.setIcon(android.R.drawable.ic_menu_sort_by_size);
@@ -339,8 +336,8 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 			Uri uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT).buildUpon()
 					.appendQueryParameter(C.MISS_SCHUELERID, String.valueOf(info.id)).build();
 			Intent intent = new Intent(Intent.ACTION_INSERT, uri);
-			// put the course number into the intent
-			intent.putExtra(Schule.CONTENT_COURSE_TYPE, mUri);
+			// put the course uri into the intent
+			intent.putExtras(getIntent().getExtras());
 
 		    // columns are: _id[0], nachname[1], vorname[2], miss_sum[3], miss_ex_sum[4], miss_ncount_sum[5]
 			menuHeader = c.getString(1) + ", " + c.getString(2);

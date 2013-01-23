@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.util.Calendar;
 
 import org.bob.school.Schule.C;
+import org.bob.school.tools.CalendarTools;
 
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
@@ -34,7 +35,8 @@ public class KursEditor extends PreferenceActivity implements
 	public static final int STATE_DATE_SETTER_START = 0;
 	public static final int STATE_DATE_SETTER_END = 1;
 
-	private Uri mUri; // .../course
+	private Uri mUri; // .../course    for ACTION_INSERT
+	                  // .../course/#  for ACTION_EDIT
 	private int mDate_setter_state;
 
 	private Calendar mEditDate; 
@@ -147,12 +149,13 @@ public class KursEditor extends PreferenceActivity implements
 		Preference pDateView = null;
 		Calendar c = Calendar.getInstance();
 		c.set(year, month, day);
+		CalendarTools.resetTime(c);
 
 		Date d = new Date(c.getTimeInMillis());
 
 		switch(mDate_setter_state) {
 		case STATE_DATE_SETTER_START:
-			mStartDate = d; 
+			mStartDate = d;
 			pDateView = findPreference("startdate");
 			break;
 		case STATE_DATE_SETTER_END:
@@ -205,6 +208,7 @@ public class KursEditor extends PreferenceActivity implements
 		}
 
 		mEditDate = Calendar.getInstance();
+		CalendarTools.resetTime(mEditDate);
 		if (c.isNull(c.getColumnIndex(C.KURS_SDATE)))
 			mStartDate = new Date(mEditDate.getTimeInMillis());
 		else

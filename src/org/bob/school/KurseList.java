@@ -77,8 +77,13 @@ public class KurseList extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-        Uri uri = ContentUris.withAppendedId(mUri, id);
-        startActivity(new Intent(KursTab.ACTION_VIEW_COURSE, uri));	
+
+		// append course name to activity title
+        Bundle b = buildExtrasBundle(id);
+        Intent i = new Intent(KursTab.ACTION_VIEW_COURSE, ContentUris.withAppendedId(mUri, id));
+        i.putExtras(b);
+        
+        startActivity(i);	
 	}
 
     @Override
@@ -106,12 +111,20 @@ public class KurseList extends ListActivity {
 
 		// Add a menu item to delete the note
 		Uri uri = ContentUris.withAppendedId(mUri, info.id);
+
+		Intent i = new Intent(KursTab.ACTION_VIEW_COURSE, uri);
+		i.putExtras(buildExtrasBundle(info.id));
 		menu.add(Menu.NONE, MENU_ITEM_VIEW, 0, R.string.menu_course_view)
-				.setIntent(new Intent(KursTab.ACTION_VIEW_COURSE, uri));		
+				.setIntent(i);
+
+		i = new Intent(KursFehlstundenEditor.ACTION_ADD_COURSE_MISSES, uri);
+		i.putExtras(buildExtrasBundle(info.id));
 		menu.add(Menu.NONE, MENU_ITEM_ADD_MISSES, 0, R.string.menu_misses_insert)
-		.setIntent(new Intent(KursFehlstundenEditor.ACTION_ADD_COURSE_MISSES, uri));		
+				.setIntent(i);
+
 		menu.add(Menu.NONE, MENU_ITEM_EDIT, 0, R.string.menu_course_edit)
 				.setIntent(new Intent(Intent.ACTION_EDIT, uri));
+
 		menu.add(Menu.NONE, MENU_ITEM_DELETE, 0, R.string.menu_course_delete);
 	}
 
@@ -132,5 +145,21 @@ public class KurseList extends ListActivity {
 		}
 		return false;
 
+	}
+
+	private Bundle buildExtrasBundle(long id) {
+        Bundle b = new Bundle();
+
+        Cursor c = getContentResolver().query(ContentUris.withAppendedId(mUri, id), null, null, null, null);
+		c.moveToFirst();
+		b.putString(Schule.PREFIX + C.KURS_NAME, c.getString(c.getColumnIndex(C.KURS_NAME)));
+		b.putLong(Schule.PREFIX + C.KURS_SDATE, c.getLong(c.getColumnIndex(C.KURS_SDATE)));
+		b.putLong(Schule.PREFIX + C.KURS_EDATE, c.getLong(c.getColumnIndex(C.KURS_EDATE)));
+
+		for (int i = 0; i < 5; ++i)
+			b.putInt(Schule.PREFIX + C.KURS_WDAYS[i], c.getInt(c.getColumnIndex(C.KURS_WDAYS[i])));
+
+		c.close();
+		return b;
 	}
 }

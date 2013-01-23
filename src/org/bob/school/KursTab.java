@@ -23,6 +23,7 @@ public class KursTab extends TabActivity {
     	final TabHost tabHost = getTabHost();
     	final Resources res = getResources();
     	mUri = getIntent().getData();
+    	Bundle b = getIntent().getExtras();
 
     	// set the course name as the title of the activity
 		Cursor c = getContentResolver().query(mUri,
@@ -33,6 +34,7 @@ public class KursTab extends TabActivity {
 
 		Uri uri = Uri.withAppendedPath(mUri, C.MISS_SEGMENT);
 		Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+		intent.putExtras(b);
 		intent.addCategory(Intent.CATEGORY_TAB);
 		tabHost.addTab(tabHost.newTabSpec("misslist")
 				.setIndicator(res.getString(R.string.title_kurs_fehlstunde_list),
@@ -40,12 +42,26 @@ public class KursTab extends TabActivity {
 				.setContent(intent));
 
 		intent = new Intent(Intent.ACTION_VIEW, mUri);
+		intent.putExtras(b);
 		intent.addCategory(Intent.CATEGORY_TAB);
-		tabHost.addTab(tabHost.newTabSpec("pupillist")
-				.setIndicator(res.getString(R.string.title_kurs_list),
+		tabHost.addTab(tabHost
+				.newTabSpec("pupillist")
+				.setIndicator(
+						res.getString(R.string.title_kurs_list),
 						res.getDrawable(R.drawable.menu_fehlstunden_schuelerliste))
 				.setContent(intent));
-    }
+
+		uri = Uri.withAppendedPath(mUri, C.CALENDAR_SEGMENT);
+		intent = new Intent(Intent.ACTION_VIEW, uri);
+		intent.putExtras(b);
+		intent.addCategory(Intent.CATEGORY_TAB);
+		tabHost.addTab(tabHost
+				.newTabSpec("course_calendar")
+				.setIndicator(
+						res.getString(R.string.title_kurs_kalender),
+						res.getDrawable(R.drawable.menu_fehlstunden_schuelerliste))
+				.setContent(intent));
+	}
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {

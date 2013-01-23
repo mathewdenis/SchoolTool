@@ -1,73 +1,110 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="org.bob.school" android:versionCode="4" android:versionName="0.1.2">
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-	<application android:icon="@drawable/icon" android:label="@string/app_name"
-		android:theme="@style/SchoolTooolTheme">
-		<provider android:name=".db.SchoolProvider"
-			android:authorities="org.bob.provider.school" />
-		<activity android:name=".KurseList" android:label="@string/title_kurs_list">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
-		<activity android:name=".KursEditor">
-			<!-- Edit a single course item -->
-			<intent-filter>
-				<action android:name="android.intent.action.EDIT" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="android.intent.action.INSERT" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.dir/vnd.bob.course" />
-			</intent-filter>
-		</activity>
-		<activity android:name=".KursFehlstundenEditor" android:label="@string/title_kurs_fehlstunde_edit">
-			<intent-filter>
-				<action android:name="org.bob.school.action.ADD_COURSE_MISSES" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
-			</intent-filter>
-		</activity>
+    package="org.bob.school"
+    android:versionCode="5"
+    android:versionName="0.2" >
 
-		<activity android:name=".KursTab">
-			<intent-filter>
-				<action android:name="org.bob.school.action.VIEW_COURSE" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
-			</intent-filter>
-		</activity>
-		<activity android:name=".SchuelerFehlstundenList" android:label="@string/title_pupil_list">
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<category android:name="android.intent.category.TAB" />
-				<data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
-			</intent-filter>
-		</activity>
-		<activity android:name=".KursFehlstundenList" android:label="@string/title_kurs_fehlstunde_list">
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<category android:name="android.intent.category.TAB" />
-				<data android:mimeType="vnd.android.cursor.dir/vnd.bob.course_miss" />
-			</intent-filter>
-		</activity>		
-		<activity android:name=".FehlstundeEditor" android:label="@string/title_fehlstunde_edit">
-			<intent-filter>
-				<action android:name="android.intent.action.EDIT" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.item/vnd.bob.miss" />
-			</intent-filter>
-			<intent-filter>
-				<action android:name="android.intent.action.INSERT" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.dir/vnd.bob.miss" />
-			</intent-filter>
-		</activity>
-	</application>
-	<uses-sdk android:minSdkVersion="7" />
-</manifest> 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-sdk android:minSdkVersion="11" android:targetSdkVersion="7" />
+
+    <application android:icon="@drawable/icon" android:label="@string/app_name"
+        android:theme="@style/SchoolTooolTheme" >
+        <provider android:name=".db.SchoolProvider"
+            android:authorities="org.bob.school.provider" />
+        <activity android:name=".KurseList" android:label="@string/title_kurs_list" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".KursEditor" >
+            <!-- Edit a single course item -->
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.INSERT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.bob.course" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".KursFehlstundenEditor"
+            android:label="@string/title_kurs_fehlstunde_edit" >
+            <intent-filter>
+                <action android:name="org.bob.school.action.ADD_COURSE_MISSES" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.bob.school.action.EDIT_COURSE_MISSES" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
+            </intent-filter>
+            </activity>
+        <activity android:name=".KursTab" >
+            <intent-filter>
+                <action android:name="org.bob.school.action.VIEW_COURSE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".SchuelerFehlstundenList"
+            android:label="@string/title_pupil_list" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.TAB" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.bob.course" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".KursFehlstundenList"
+            android:label="@string/title_kurs_fehlstunde_list" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.TAB" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.bob.course_miss" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".FehlstundeEditor"
+            android:label="@string/title_fehlstunde_edit" >
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.bob.miss" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.INSERT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.bob.miss" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".KursKalender"
+            android:label="@string/title_kurs_kalender">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.TAB" />
+                <data android:mimeType="vnd.android.cursor.item/vnd.bob.course_calendar" />
+            </intent-filter>
+        </activity>
+<!-- 
+        <activity android:name="com.exina.android.calendar.CalendarActivity"
+            android:label="@string/cal_app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.exina.android.calendar.date" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/vnd.exina.android.calendar.date" />
+            </intent-filter>
+        </activity>
+-->
+    </application>
+
+</manifest>
