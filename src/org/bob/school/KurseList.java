@@ -4,7 +4,9 @@ import org.bob.school.Schule.C;
 import org.bob.school.tools.AlertDialogs;
 
 import android.app.ListActivity;
+import android.app.LoaderManager;
 import android.content.ContentUris;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -62,8 +64,8 @@ public class KurseList extends ListActivity {
 	private void createCourseList() {
 		Uri uri = mUri.buildUpon()
 				.appendQueryParameter(C.QUERY_PUPIL_COUNT, "1").build();
-		Cursor c = managedQuery(uri, new String[] { C._ID,
-				C.KURS_NAME }, null, null, DEFAULT_SORT_ORDER_KURS);
+		Cursor c = new CursorLoader(this, uri, new String[] { C._ID,
+				C.KURS_NAME }, null, null, DEFAULT_SORT_ORDER_KURS).loadInBackground();
 		c.setNotificationUri(getContentResolver(), mUri);
 
 		SimpleCursorAdapter sca = new SimpleCursorAdapter(this,

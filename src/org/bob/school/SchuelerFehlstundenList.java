@@ -16,6 +16,7 @@ import android.app.AlertDialog;
 import android.app.ExpandableListActivity;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -161,12 +162,12 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 				.buildUpon()
 				.appendQueryParameter(C.QUERY_SUM_MISS, "1").build();
 
-		Cursor c = managedQuery(uri, new String[] { C._ID,
+		Cursor c = new CursorLoader(this, uri, new String[] { C._ID,
 				C.SCHUELER_NACHNAME, C.SCHUELER_VORNAME,
 				C.MISS_SUM_STUNDEN_Z,
 				C.MISS_SUM_STUNDEN_E,
 				C.MISS_SUM_STUNDEN_NZ}, null, null,
-				getSortOrder());
+				getSortOrder()).loadInBackground();
 
 		c.setNotificationUri(getContentResolver(), mUri);
 		SimpleCursorTreeAdapter sca = new SimpleCursorTreeAdapter(this, c,
@@ -180,8 +181,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 			protected Cursor getChildrenCursor(Cursor groupCursor) {
 				Uri uri = Uri.withAppendedPath(C.CONTENT_URI, C.MISS_SEGMENT);
 				groupCursor.getInt(0);
-				Cursor c = managedQuery(
-						uri,
+				Cursor c = new CursorLoader(SchuelerFehlstundenList.this, uri,
 						new String[] { C._ID, C.MISS_DATUM, C.MISS_STUNDEN_Z,
 								C.MISS_STUNDEN_E, C.MISS_STUNDEN_NZ },
 						C.MISS_SCHUELERID + "= ? and " + C.MISS_DATUM
@@ -189,7 +189,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 						new String[] { groupCursor.getString(0),
 								String.valueOf(mSDatum.getTimeInMillis()),
 								String.valueOf(mEDatum.getTimeInMillis()) },
-						SORT_ORDER_DATE);
+						SORT_ORDER_DATE).loadInBackground();
 				c.setNotificationUri(getContentResolver(), uri);
 				return c;
 			}
