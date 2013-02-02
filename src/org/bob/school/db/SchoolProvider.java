@@ -204,7 +204,8 @@ public class SchoolProvider extends ContentProvider {
 						"sum(" + C.MISS_STUNDEN_E + ") AS "
 								+ C.MISS_SUM_STUNDEN_E,
 						"sum(" + C.MISS_STUNDEN_NZ + ") AS "
-								+ C.MISS_SUM_STUNDEN_NZ};
+								+ C.MISS_SUM_STUNDEN_NZ,
+						"count(*) AS " + C._COUNT};
 			}
 
 			break;

@@ -86,7 +86,9 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		}
 	}
 
-	public static class DateBinder implements
+	/** Class describes the look of a line in the list
+	 */
+	public static class DateListDisplayBinder implements
 			SimpleCursorTreeAdapter.ViewBinder {
 
 		@Override
@@ -94,16 +96,15 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 			TextView tv = (TextView) view;
 			int tv_color = tv.getResources().getColor(
 					android.R.color.primary_text_dark);
-			// in this case, the columns are (_id [0], datum [1], miss_count_sum [2], miss_ex_sum [3], miss_ncount_sum [4])
-			if (c.getColumnIndex(C.SCHUELER_NACHNAME) == -1) {
-				tv.setText(CalendarTools.LISTVIEW_DATE_FORMATER.format(new Date(c.getLong(1))));
+			// in this case, the columns are (max(_id) [0], datum [1], sum(miss_count)[2], sum(miss_ex) [3], sum(miss_ncount) [4], count(*)[5])
+			if (c.getColumnIndex(C.MISS_DATUM) == columnIndex) {
+				tv.setText(CalendarTools.LISTVIEW_DATE_FORMATER.format(new Date(c.getLong(columnIndex)))
+						+ " (" + c.getLong(5) + ")");
 
 				// set text color appropriately dependening on whether all
 				// misses are excused
 				if(c.getInt(2)!=c.getInt(3))
 					tv_color = tv.getResources().getColor(R.color.color_unexcused);
-//				else
-//					tv_color = tv.getResources().getColor(R.color.color_excused);
 			}
 			// here, columns are (_id [0], nachname [1], vorname [2], miss_count [3], miss_ex [4], miss_ncount[5])
 			else {
@@ -163,7 +164,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		registerForContextMenu(mExpListView);
 		mExpListView.setOnChildClickListener(this);
 
-		// dirty hack's projection is { max(miss._id), miss.datum, miss_sum, miss_ex_sum }
+		// dirty hack's projection is { max(_id) [0], datum [1], sum(miss_count), sum(miss_ex), sum(miss_ncount), count(*)  }
 		Cursor c = new CursorLoader(this,
 				mUri.buildUpon()
 						.appendQueryParameter(
@@ -177,11 +178,11 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		// set the expandable list adapter
 		mSCTAdapter = new MySimpleCursorTreeAdapter(this,
 				mUri, c, android.R.layout.simple_expandable_list_item_1,
-				new String[] { C._ID }, new int[] { android.R.id.text1 },
+				new String[] { C.MISS_DATUM }, new int[] { android.R.id.text1 },
 				android.R.layout.simple_expandable_list_item_2, new String[] {
 						C.SCHUELER_NACHNAME, C.MISS_STUNDEN_Z }, new int[] {
 						android.R.id.text1, android.R.id.text2 });
-		mSCTAdapter.setViewBinder(new DateBinder());
+		mSCTAdapter.setViewBinder(new DateListDisplayBinder());
 		mExpListView.setAdapter(mSCTAdapter);
 	}
 
