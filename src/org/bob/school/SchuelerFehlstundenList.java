@@ -388,7 +388,7 @@ public class SchuelerFehlstundenList extends ExpandableListActivity {
 									getContentResolver().update(
 											uri_group,
 											values,
-											BaseColumns._ID,
+											BaseColumns._ID + "=?",
 											new String[] { uri_group
 													.getLastPathSegment() });
 									// notify managed cursor of this ListView

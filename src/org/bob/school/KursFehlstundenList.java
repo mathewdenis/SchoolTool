@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.BaseColumns;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -191,6 +192,7 @@ public class KursFehlstundenList extends Activity implements OnChildClickListene
 		super.onResume();
 		// set title of parent tab activity 
 		getParent().setTitle(getTitle() + ": " + mCourseName);		
+		getContentResolver().notifyChange(mUri, null);
 	}
 
 	@Override
