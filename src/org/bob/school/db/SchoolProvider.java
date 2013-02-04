@@ -389,6 +389,9 @@ public class SchoolProvider extends ContentProvider {
 			throw new IllegalArgumentException(
 					"SchoolProvider.update: Unknown URI " + uri);
 		}
+		Log.d(TAG, "update: " + tableName + ", values: " + values
+				+ ", selection: " + selection + ", selectionArgs:"
+				+ StringTools.arrayToString(selectionArgs, ", "));
 		count = db.update(tableName, values, selection, selectionArgs);
 		getContext().getContentResolver().notifyChange(uri, null);
 		return count;
@@ -426,7 +429,7 @@ public class SchoolProvider extends ContentProvider {
 		Log.d(TAG,
 				"DELETE FROM  " + tableName + " WHERE " + selection
 						+ " WITH ARGUMENTS ["
-						+ StringTools.arrayToString(selectionArgs, ",") + "]");
+						+ (selectionArgs != null ? StringTools.arrayToString(selectionArgs, ",") : null) + "]");
 		count = db.delete(tableName, selection, selectionArgs);
 
 		getContext().getContentResolver().notifyChange(uri, null);
