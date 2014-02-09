@@ -72,7 +72,7 @@ public class KursFehlstundenEditor extends Activity implements
 		// check whether a specific date is given in the intent
 		// get course information
 		Bundle extras = getIntent().getExtras();
-		if(getIntent().getAction().equals(ACTION_EDIT_COURSE_MISSES))
+		if(extras != null && extras.getLong(Schule.DATE_EXTRA) != 0)
 			today.setTimeInMillis(extras.getLong(Schule.DATE_EXTRA));
 		CalendarTools.resetTime(today);
 
